@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>EC.ixi</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <script src="node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="main.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Economic Clustering</h1>
+        <p>Economic Clustering brings consensus to Ict. It enables value transfers despite the lightness of Ict nodes.</p>
+    </header>
+    <div id="content">
+        <div class="section" id="wallet">
+            <h2>Wallet</h2>
+            <input type="password" placeholder="seed" id="seed">
+            <input type="button" value="generate addresses" onclick="refresh_wallet()">
+            <table></table>
+        </div>
+        <div class="section" id="cluster">
+            <h2>Cluster</h2>
+            <input type="text" placeholder="address">
+            <input type="button" value="add">
+            <table>
+                <tr>
+                    <th>actor</th>
+                    <th>trust</th>
+                </tr>
+                <tr><td>KDNMYEMGVXEGJS9MSLV9AE9VYCLOGKTCOUZDUDTS99K9SNSLWYGMCWYWTYXJEY9ADMH9AISGQL9IA9999</td><td>0.5</td></tr>
+                <tr><td>E9VYCLOGKTCOUZDUDTS99KKDNMYEMGVXEGJS9MSLV9A9SNSLWYGMCWYWTYXJEY9ADMH9AISGQL9IA9999</td><td>0.3</td></tr>
+                <tr><td>XJEY9ADMH9AISGQKDNMYEMGVXEGJS9MSLV9AE9VYCLOGKTCOUZDUDTS99K9SNSLWYGMCWYWTYL9IA9999</td><td>0.2</td></tr>
+            </table>
+        </div>
+        <div class="section" id="actors">
+            <h2>Actors</h2>
+            <input type="number" placeholder="merkle tree depth">
+            <input type="button" value="create">
+            <table>
+                <tr>
+                    <th>actor</th>
+                </tr>
+                <tr><td>KDNMYEMGVXEGJS9MSLV9AE9VYCLOGKTCOUZDUDTS99K9SNSLWYGMCWYWTYXJEY9ADMH9AISGQL9IA9999</td></tr>
+                <tr><td>E9VYCLOGKTCOUZDUDTS99KKDNMYEMGVXEGJS9MSLV9A9SNSLWYGMCWYWTYXJEY9ADMH9AISGQL9IA9999</td></tr>
+                <tr><td>XJEY9ADMH9AISGQKDNMYEMGVXEGJS9MSLV9AE9VYCLOGKTCOUZDUDTS99K9SNSLWYGMCWYWTYL9IA9999</td></tr>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
