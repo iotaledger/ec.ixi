@@ -7,6 +7,7 @@ public class Main {
 
     public static void main(String[] args) {
         Ict ict = new Ict(new Properties().toFinal());
-        ECModule module = new ECModule(ict);
+        ict.getModuleHolder().initAllModules();
+        ict.getModuleHolder().startAllModules();
     }
 }

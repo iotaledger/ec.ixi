@@ -52,3 +52,33 @@ function get_balances(seed) {
     };
     return balance_by_address;
 }
+
+function ec_request(request, success) {
+    ajax("getModuleResponse", {"request": request, "path": "ec.ixi-1.0.jar"}, data => {
+        success(JSON.parse(data['response']));
+    });
+}
+
+function ajax(path, data, success) {
+    data['password'] = "change_me_now";
+    $.ajax({
+        url: "http://localhost:2187/" + path,
+        method: "POST",
+        data: serialize_post_data(data),
+        dataType: "json",
+        success: function (data) {
+            success(data);
+        },
+        error: function (error) {
+            alert(JSON.stringify(error));
+        }
+    });
+}
+
+function serialize_post_data(data) {
+    const serialized = [];
+    $.each(data, function (name, value) {
+        serialized.push({"name": name, "value": value});
+    });
+    return serialized;
+}

@@ -27,7 +27,7 @@ dependencies {
 
 task ixi(type: Jar) {
     baseName = 'ec.ixi'
-    destinationDir = file("$rootDir")
+    destinationDir = file("$rootDir/modules")
     from("./") {
         include 'module.json'
         include 'web/**'

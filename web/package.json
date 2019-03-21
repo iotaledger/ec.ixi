@@ -1,7 +1,7 @@
 {
   "name": "ec.ixi",
   "repository": "https://github.com/iotaledger/ec.ixi",
-  "version": "0.6.0",
+  "version": "1.0.0",
   "description": "Economic Clustering IXI - module GUI for Ict",
   "main": "main.js",
   "author": "Lukas Tassanyi <lukas.tassanyi@iota.org>",
