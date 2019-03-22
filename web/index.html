@@ -17,32 +17,32 @@
         <div class="section" id="wallet">
             <h2>Wallet</h2>
             <input type="text" placeholder="seed" id="seed">
-            <input type="button" value="generate addresses" onclick="refresh_wallet()">
+            <input type="button" value="load wallet" onclick="Gui.refresh_wallet()">
             <table></table>
         </div>
         <div class="section" id="transfers">
             <h2>Transfers</h2>
             <input type="hidden" id="transfers_seed" />
             <input type="hidden" id="transfers_index" />
-            <input type="text" placeholder="sender address" disabled />
+            <input type="text" placeholder="sender address" id="transfers_sender" disabled />
             <input type="text" placeholder="remainder address" id="transfers_remainder" /><br/>
             <input type="text" placeholder="receiver address" id="transfers_receiver" />
-            <input type="number" placeholder="value" id="transfers_value" />
-            <input type="button" value="submit" onclick="button_submit_transfer();">
+            <input type="number" placeholder="value" id="transfers_value" step="1" min="0" max="2800000000000000"/>
+            <input type="button" value="submit" onclick="Btn.submit_transfer();">
             <table></table>
         </div>
         <div class="section" id="cluster">
             <h2>Cluster</h2>
             <input type="text" placeholder="address" id="cluster_address">
-            <input type="number" placeholder="trust" id="cluster_trust">
-            <input type="button" value="add" onclick="button_add_actor();">
+            <input type="number" placeholder="trust" id="cluster_trust" step="0.01" min="0">
+            <input type="button" value="add" onclick="Btn.add_actor();">
             <table>
             </table>
         </div>
         <div class="section" id="actors">
             <h2>Actors</h2>
-            <input type="number" placeholder="merkle tree depth" id="merkle_tree_depth">
-            <input type="button" value="create" onclick="button_create_actor();">
+            <input type="number" placeholder="merkle tree depth" id="merkle_tree_depth" step="1" min="1" max="6">
+            <input type="button" value="create" onclick="Btn.create_actor();">
             <table></table>
         </div>
     </div>

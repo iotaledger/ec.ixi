@@ -9,6 +9,7 @@ let display_balances, display_actors, display_cluster, display_transfers;
 const Gui = {};
 const Gen = {};
 const Api = {};
+const Btn = {};
 
 window.onload = function () {
     init_elements();
@@ -35,15 +36,51 @@ function init_elements() {
 }
 
 function init_functions() {
-    display_balances = Gen.gen_display_function('wallet', ["address", "balance"], entry => [entry['address'], entry['balance']]);
-    display_actors = Gen.gen_display_function("actors", ["address"], actor => [actor]);
-    display_cluster = Gen.gen_display_function("cluster", ["address", "trust"], entry => [entry['address'], entry['trust']]);
-    display_transfers = Gen.gen_display_function("transfers", ["hash of head"], hash => [hash]);
+
+    const shorten = (hash) => $("<div>").text(hash.substr(0, 30) + "…")
+        .append(Gen.gen_cell_button("copy", () => {}));
+
+    const prepare_transfer = (seed, index, address, balance) => {
+        val("transfers_seed", seed);
+        val("transfers_index", index);
+        val("transfers_sender", address);
+        val("transfers_receiver", "");
+        val("transfers_remainder", "");
+        val("transfers_value", balance);
+    };
+
+    const wallet_serialize = (entry, index) => [
+        shorten(entry['address']),
+        entry['balance'],
+        $("<div>")
+            .append(Gen.gen_cell_button("send", () => {prepare_transfer(val("seed"), index, entry['address'], entry['balance'])}))
+    ];
+
+    const actors_serialize = actor => [
+        shorten(actor),
+        Gen.gen_cell_button("✘", () => {})
+    ];
+
+    const cluster_serialize = entry => [
+        shorten(entry['address']),
+        entry['trust'],
+        Gen.gen_cell_button("✘", () => {})
+    ];
+
+    const transfers_serialize = hash => [
+        shorten(hash),
+        Gen.gen_cell_button("status", () => {})
+    ];
+
+    display_balances = Gen.gen_display_function('wallet', ["address", "balance", ""], wallet_serialize);
+    display_actors = Gen.gen_display_function("actors", ["address", ""], actors_serialize);
+    display_cluster = Gen.gen_display_function("cluster", ["address", "trust", ""], cluster_serialize);
+    display_transfers = Gen.gen_display_function("transfers", ["transfer", ""], transfers_serialize);
 }
 
 /* ***** BUTTON ACTIONS ***** */
 
-function button_submit_transfer() {
+Btn.submit_transfer = () => {
     const seed = val("transfers_seed");
     const index = parseInt(val("transfers_index"));
     const receiver = val("transfers_receiver");
@@ -52,13 +89,13 @@ function button_submit_transfer() {
     submit_transfer(seed, index, receiver, remainder, value, alert);
 }
 
-function button_create_actor() {
+Btn.create_actor = () => {
     const merkle_tree_depth = parseInt(val("merkle_tree_depth"));
     const seed = random_trytes(81);
     create_actor(seed, merkle_tree_depth, 0);
 }
 
-function button_add_actor() {
+Btn.add_actor = () => {
     const address = val("cluster_address");
     const trust = parseFloat(val("cluster_trust"));
     add_actor(address, trust);
@@ -111,7 +148,7 @@ Gen.gen_display_function = function (table_name, table_head, object_serializer) 
     return function(objects) {
         $table.html(Gen.gen_table_row(table_head, true));
         $.each(objects, function (index, object) {
-            $table.append(Gen.gen_table_row(object_serializer(object)));
+            $table.append(Gen.gen_table_row(object_serializer(object, index)));
         });
     };
 };
@@ -124,10 +161,12 @@ Gen.gen_display_function = function (table_name, table_head, object_serializer) 
 Gen.gen_table_row = function (cells, th = false) {
     const $tr = $("<tr>");
     $.each(cells, function (_, cell) {
-        $tr.append($(th ? "<th>" : "<td>").text(cell));
+        $tr.append($(th ? "<th>" : "<td>").html(cell));
     });
     return $tr;
 };
+
+Gen.gen_cell_button = (name, onclick) => $("<input>").attr("type", "button").val(name).click(onclick);
 
 /* ***** API WRAPPERS ***** */
 
