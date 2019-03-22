@@ -63,7 +63,7 @@ public class ECModule extends IxiModule {
 
     /****** SERVICES ******/
 
-    private void considerTangle(String actorAddress, String trunk, String branch) {
+    void considerTangle(String actorAddress, String trunk, String branch) {
         AutonomousEconomicActor actor = findAutonomousActor(actorAddress);
         if(actor == null)
             throw new IllegalArgumentException("None of the actors controlled by you has the address '"+actorAddress+"'");

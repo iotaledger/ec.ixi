@@ -1,30 +1,71 @@
 let $input_seed;
+let $input_merkle_tree_depth;
+
 let $wallet_table;
 let $cluster_table;
 let $actors_table;
 
 window.onload = function () {
     init_elements();
+    refresh_wallet();
+    refresh_actors();
 };
 
 /**
  * Initializes global jQuery pointers to commonly used DOM objects.
  * */
 function init_elements() {
+    $input_seed = $('#seed');
+    $input_merkle_tree_depth = $('#merkle_tree_depth');
+    
+    $input_seed.val(random_seed());
+    $input_merkle_tree_depth.val(3);
+
     $wallet_table = $('#wallet table');
     $cluster_table = $('#cluster table');
     $actors_table = $('#actors table');
-    $input_seed = $('#seed');
+}
+
+function create_actor_button() {
+    const merkle_tree_depth = parseInt($input_merkle_tree_depth.val());
+    const seed = random_seed();
+    create_actor(seed, merkle_tree_depth, 0);
+}
+
+function random_seed() {
+    let seed = "";
+    for(let i = 0; i < 81; i++)
+        seed += random_tryte();
+    return seed;
+}
+
+function random_tryte() {
+    const TRYTES = "ABCDEFGHIJKLMNOPQRSTUVWXYZ9";
+    return TRYTES.charAt(Math.floor(Math.random()*27));
 }
 
 /**
  * Loads and displays the addresses with their respective balances in the wallet section.
  * */
 function refresh_wallet() {
-    const balances = get_balances($input_seed.val());
-    $('#wallet table').html(gen_table_row(["address", "balance"], true));
-    $.each(balances, function (address, balance) {
-        $wallet_table.append(gen_table_row([address, balance]));
+    get_balances($input_seed.val(), display_balances);
+}
+
+function refresh_actors() {
+    get_actors(display_actors);
+}
+
+function display_balances(balances) {
+    $wallet_table.html(gen_table_row(["address", "balance"], true));
+    $.each(balances, function (index, entry) {
+        $wallet_table.append(gen_table_row([entry['address'], entry['balance']]));
+    });
+}
+
+function display_actors(actors) {
+    $actors_table.html(gen_table_row(["address"], true));
+    $.each(actors, function (index, actor) {
+        $actors_table.append(gen_table_row([actor]));
     });
 }
 
@@ -41,21 +82,39 @@ function gen_table_row(cells, th = false) {
     return $tr;
 }
 
+
 /**
- * @param seed The seed to derive the addresses from.
- * @return A map of the addresses derived from this seed with their respective balances in iotas.
+ * @param seed {string} The seed to derive the addresses from.
+ * @param {get_balances_callback} callback
  * */
-function get_balances(seed) {
-    const balance_by_address = {
-        "KDNMYEMGVXEGJS9MSLV9AE9VYCLOGKTCOUZDUDTS99K9SNSLWYGMCWYWTYXJEY9ADMH9AISGQL9IA9999": 117,
-        "E9VYCLOGKTCOUZDUDTS99KKDNMYEMGVXEGJS9MSLV9A9SNSLWYGMCWYWTYXJEY9ADMH9AISGQL9IA9999": 33
-    };
-    return balance_by_address;
+function get_balances(seed, callback) {
+    /**
+     * @callback get_balances_callback
+     * @param {json} balances map of the addresses derived from this seed with their respective balances in iotas
+     */
+    ec_request({"action": "get_balances", "seed": seed}, response => callback(response['balances']));
+}
+
+/**
+ * @param {get_actors_callback} callback
+ * */
+function get_actors(callback) {
+    /**
+     * @callback get_actors_callback
+     * @param {array} addresses of all actors
+     */
+    ec_request({"action": "get_actors"}, response => callback(response['actors']));
+}
+
+function create_actor(seed, merkle_tree_depth, start_index) {
+    console.log(merkle_tree_depth);
+    ec_request({"action": "create_actor", "seed": seed, "merkle_tree_depth": merkle_tree_depth, "start_index": start_index}, refresh_actors);
 }
 
 function ec_request(request, success) {
-    ajax("getModuleResponse", {"request": request, "path": "ec.ixi-1.0.jar"}, data => {
-        success(JSON.parse(data['response']));
+    ajax("getModuleResponse", {"request": JSON.stringify(request), "path": "ec.ixi-1.0.jar"}, data => {
+        const response = JSON.parse(data['response']);
+        response['success'] ? (success ? success(response) : {}) : console.error("api error: " + response['error']);
     });
 }
 
@@ -66,9 +125,7 @@ function ajax(path, data, success) {
         method: "POST",
         data: serialize_post_data(data),
         dataType: "json",
-        success: function (data) {
-            success(data);
-        },
+        success: success,
         error: function (error) {
             alert(JSON.stringify(error));
         }

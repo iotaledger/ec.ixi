@@ -8,29 +8,32 @@ import org.json.JSONObject;
 import java.math.BigInteger;
 import java.util.List;
 
-public class API {
+class API {
 
     private final ECModule module;
 
-    public API(ECModule module) {
+    API(ECModule module) {
         this.module = module;
     }
 
-    public String processRequest(String request) {
+    String processRequest(String request) {
         JSONObject response;
         try {
+            System.out.println("--> " + request);
             JSONObject requestJSON = new JSONObject(request);
             String action = requestJSON.getString("action");
             response = performAction(action, requestJSON);
         } catch (Throwable t) {
             response = new JSONObject().put("success", false).put("error", t.toString());
+            t.printStackTrace();
         }
         return response.toString();
     }
 
-    public JSONObject performAction(String action, JSONObject requestJSON) {
+    JSONObject performAction(String action, JSONObject requestJSON) {
         JSONObject success = new JSONObject().put("success", true);
         switch (action) {
+            /* ***** GET ***** */
             case "get_cluster":
                 return success.put("cluster", getClusterJSON());
             case "get_cluster_confidences":
@@ -38,6 +41,10 @@ public class API {
                 return success.put("cluster_confidences", getClusterConfidences(hashes));
             case "get_actors":
                 return success.put("actors", getActorsJSON());
+            case "get_balances":
+                String seed = requestJSON.getString("seed");
+                return success.put("balances", getBalancesJSON(seed));
+            /* ***** DO ***** */
             case "create_actor":
                 performActionCreateActor(requestJSON);
                 return success;
@@ -49,9 +56,19 @@ public class API {
             case "send_transfer":
                 String hash = performActionSendTransfer(requestJSON);
                 return success.put("hash", hash);
+            case "consider_tangle":
+                performActionConsiderTangle(requestJSON);
+                return success;
             default:
                 throw new IllegalArgumentException("unknown action '"+action+"'");
         }
+    }
+
+    private void performActionConsiderTangle(JSONObject requestJSON) {
+        String actor = requestJSON.getString("actor");
+        String trunk = requestJSON.getString("trunk");
+        String branch = requestJSON.getString("branch");
+        module.considerTangle(actor, trunk, branch);
     }
 
     private JSONObject getClusterConfidences(JSONArray hashes) {
