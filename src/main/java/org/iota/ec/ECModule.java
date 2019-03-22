@@ -1,7 +1,6 @@
 package org.iota.ec;
 
 import org.iota.ict.ec.AutonomousEconomicActor;
-import org.iota.ict.ec.ControlledEconomicActor;
 import org.iota.ict.ec.EconomicCluster;
 import org.iota.ict.ec.TrustedEconomicActor;
 import org.iota.ict.ixi.Ixi;
@@ -16,8 +15,6 @@ import org.iota.ict.model.transfer.OutputBuilder;
 import org.iota.ict.model.transfer.TransferBuilder;
 import org.iota.ict.utils.crypto.AutoIndexedMerkleTree;
 import org.iota.ict.utils.crypto.SignatureSchemeImplementation;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.math.BigInteger;
 import java.util.*;

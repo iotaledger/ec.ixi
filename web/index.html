@@ -28,21 +28,21 @@
             <input type="text" placeholder="remainder address" id="transfers_remainder" /><br/>
             <input type="text" placeholder="receiver address" id="transfers_receiver" />
             <input type="number" placeholder="value" id="transfers_value" />
-            <input type="button" value="submit" onclick="submit_transfer_button();">
+            <input type="button" value="submit" onclick="button_submit_transfer();">
             <table></table>
         </div>
         <div class="section" id="cluster">
             <h2>Cluster</h2>
             <input type="text" placeholder="address" id="cluster_address">
             <input type="number" placeholder="trust" id="cluster_trust">
-            <input type="button" value="add" onclick="add_actor_button();">
+            <input type="button" value="add" onclick="button_add_actor();">
             <table>
             </table>
         </div>
         <div class="section" id="actors">
             <h2>Actors</h2>
             <input type="number" placeholder="merkle tree depth" id="merkle_tree_depth">
-            <input type="button" value="create" onclick="create_actor_button();">
+            <input type="button" value="create" onclick="button_create_actor();">
             <table></table>
         </div>
     </div>
