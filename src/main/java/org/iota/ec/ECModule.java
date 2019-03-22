@@ -32,6 +32,7 @@ public class ECModule extends IxiModule {
     private final EconomicCluster cluster;
     private final List<AutonomousEconomicActor> autonomousActors = new LinkedList<>();
     private final List<TrustedEconomicActor> trustedActors = new LinkedList<>();
+    private final List<String> transfers = new LinkedList<>();
     private final Map<String, BigInteger> initialBalances = new HashMap<>();
 
     private final IxiContext context = new ECContext();
@@ -40,6 +41,7 @@ public class ECModule extends IxiModule {
         super(ixi);
         this.cluster = new EconomicCluster(ixi);
         this.api = new API(this);
+        transfers.add("TESTTRANSFER999999999999999999999999999999999999999999999999999999999999999999999");
     }
 
     /****** IXI ******/
@@ -96,7 +98,7 @@ public class ECModule extends IxiModule {
     }
 
     BigInteger getBalanceOfAddress(String address) {
-        BigInteger sum = BigInteger.ZERO;
+        BigInteger sum = initialBalances.getOrDefault(address, BigInteger.ZERO);
         Set<Transaction> transactionsOnAddress = ixi.findTransactionsByAddress(address);
         for(Transaction transaction : transactionsOnAddress) {
             if(!transaction.value.equals(BigInteger.ZERO)) {
@@ -143,7 +145,8 @@ public class ECModule extends IxiModule {
     }
 
     private String findTip() {
-        throw new RuntimeException("implement me");
+        return Transaction.NULL_TRANSACTION.hash;
+        //throw new RuntimeException("implement me");
     }
 
     /**
@@ -156,7 +159,9 @@ public class ECModule extends IxiModule {
         Bundle bundle = bundleBuilder.build();
         for(Transaction transaction : bundle.getTransactions())
             ixi.submit(transaction);
-        return bundle.getHead().hash;
+        String hash = bundle.getHead().hash;
+        transfers.add(hash);
+        return hash;
     }
 
     /****** GETTERS *****/
@@ -167,5 +172,9 @@ public class ECModule extends IxiModule {
 
     List<AutonomousEconomicActor> getAutonomousActors() {
         return new LinkedList<>(autonomousActors);
+    }
+
+    public List<String> getTransfers() {
+        return new LinkedList<>(transfers);
     }
 }

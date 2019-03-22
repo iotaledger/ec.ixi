@@ -7,19 +7,21 @@ body {
     background-color: #DDD;
     margin: 0;
     color: #444;
+    font-size: 0;
 }
 
 header {
-    padding: 50px;
+    padding: 30px 70px;
     background-color: #EEE;
 }
 
 header h1 {
     font-size: 40px;
+    margin-bottom: 20px;
 }
 
 header p {
-    font-size: 20px;
+    font-size: 16px;
     font-weight: lighter;
 }
 
@@ -52,7 +54,7 @@ input {
     border-radius: 3px;
     width: 300px;
     font-size: 16px;
-    margin: 2px;
+    margin: 5px;
 }
 
 input[type=button] {
@@ -61,8 +63,12 @@ input[type=button] {
     font-weight: bold;
     text-align: center;
     cursor: pointer;
-    width: 200px;
+    width: 190px;
     transition: 0.2s background-color;
+}
+
+input[type=number] {
+    width: 100px;
 }
 
 input[type=button]:hover {

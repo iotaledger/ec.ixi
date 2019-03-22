@@ -44,6 +44,9 @@ class API {
             case "get_balances":
                 String seed = requestJSON.getString("seed");
                 return success.put("balances", getBalancesJSON(seed));
+            case "get_transfers":
+                JSONArray transfersJSON = new JSONArray(module.getTransfers());
+                return success.put("transfers", transfersJSON);
             /* ***** DO ***** */
             case "create_actor":
                 performActionCreateActor(requestJSON);

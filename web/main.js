@@ -12,12 +12,14 @@ let $input_transfers_remainder;
 let $wallet_table;
 let $cluster_table;
 let $actors_table;
+let $transfers_table;
 
 window.onload = function () {
     init_elements();
     refresh_wallet();
     refresh_actors();
     refresh_cluster();
+    refresh_transfers();
 };
 
 /**
@@ -35,13 +37,14 @@ function init_elements() {
     $input_transfers_receiver = $('#transfers_receiver');
     $input_transfers_remainder = $('#transfers_remainder');
 
-    $input_seed.val(random_seed());
+    $input_seed.val(random_trytes(81));
     $input_merkle_tree_depth.val(3);
     $input_cluster_trust.val(0.2);
 
     $wallet_table = $('#wallet table');
     $cluster_table = $('#cluster table');
     $actors_table = $('#actors table');
+    $transfers_table = $('#transfers table');
 }
 
 function submit_transfer_button() {
@@ -55,7 +58,7 @@ function submit_transfer_button() {
 
 function create_actor_button() {
     const merkle_tree_depth = parseInt($input_merkle_tree_depth.val());
-    const seed = random_seed();
+    const seed = random_trytes(81);
     create_actor(seed, merkle_tree_depth, 0);
 }
 
@@ -65,9 +68,9 @@ function add_actor_button() {
     add_actor(address, trust);
 }
 
-function random_seed() {
+function random_trytes(length) {
     let seed = "";
-    for(let i = 0; i < 81; i++)
+    for(let i = 0; i < length; i++)
         seed += random_tryte();
     return seed;
 }
@@ -92,6 +95,10 @@ function refresh_cluster() {
     get_cluster(display_cluster)
 }
 
+function refresh_transfers() {
+    get_transfers(display_transfers)
+}
+
 function display_balances(balances) {
     $wallet_table.html(gen_table_row(["address", "balance"], true));
     $.each(balances, function (index, entry) {
@@ -110,6 +117,13 @@ function display_cluster(actors) {
     $cluster_table.html(gen_table_row(["address", "trust"], true));
     $.each(actors, function (index, entry) {
         $cluster_table.append(gen_table_row([entry["address"], entry["trust"]]));
+    });
+}
+
+function display_transfers(transfers) {
+    $transfers_table.html(gen_table_row(["hash of head"], true));
+    $.each(transfers, function (index, hash) {
+        $transfers_table.append(gen_table_row([hash]));
     });
 }
 
@@ -138,6 +152,9 @@ function submit_transfer(seed, index, receiver, remainder, value, callback) {
     ec_request(request, response => callback(response['hash']));
 }
 
+function get_transfers(callback) {
+    ec_request({"action": "get_transfers"}, response => callback(response['transfers']));
+}
 
 /**
  * @param seed {string} The seed to derive the addresses from.
