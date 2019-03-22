@@ -4,7 +4,7 @@
 
 body {
     font-family: sans-serif;
-    background-color: #EEE;
+    background-color: #F8F8F8;
     margin: 0;
     color: #444;
     font-size: 0;
@@ -12,17 +12,28 @@ body {
 
 header {
     padding: 30px 70px;
-    background-color: #F8F8F8;
+    background-color: #44B;
+    color: #FFF;
 }
 
 header h1 {
     font-size: 40px;
     margin-bottom: 20px;
+    letter-spacing: -0.05em;
+}
+
+header h1 #sub_headline {
+    font-size: 0.6em;
+    font-style: italic;
+    font-weight: lighter;
+    color: rgba(255, 255, 255, 0.3);
+    margin-left: 20px;
+    letter-spacing: 0.05em;
 }
 
 header p {
     font-size: 16px;
-    font-weight: lighter;
+    letter-spacing: -0.03em;
 }
 
 #content {
@@ -33,18 +44,21 @@ header p {
 .section {
     display: inline-block;
     background-color: #FFF;
-    min-height: 400px;
+    min-height: 500px;
+    max-height: 500px;
+    overflow-y: scroll;
     border-radius: 3px;
     margin: 20px;
     padding: 20px 30px;
     vertical-align: top;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
 }
 
 .section h2 {
     text-align: center;
-    font-size: 30px;
+    font-size: 24px;
     font-weight: normal;
-    margin-bottom: 30px;
+    margin: 15px 0 30px 0;
 }
 
 input {

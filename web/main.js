@@ -38,7 +38,7 @@ function init_elements() {
 function init_functions() {
 
     const shorten = (hash) => $("<div>").text(hash.substr(0, 30) + "…")
-        .append(Gen.gen_cell_button("copy", () => {}));
+        .append(Gen.gen_cell_button("copy", () => {copy_to_clipboard(hash)}));
 
     const prepare_transfer = (seed, index, address, balance) => {
         val("transfers_seed", seed);
@@ -87,19 +87,19 @@ Btn.submit_transfer = () => {
     const remainder = val("transfers_remainder");
     const value = val("transfers_value");
     submit_transfer(seed, index, receiver, remainder, value, alert);
-}
+};
 
 Btn.create_actor = () => {
     const merkle_tree_depth = parseInt(val("merkle_tree_depth"));
     const seed = random_trytes(81);
     create_actor(seed, merkle_tree_depth, 0);
-}
+};
 
 Btn.add_actor = () => {
     const address = val("cluster_address");
     const trust = parseFloat(val("cluster_trust"));
     add_actor(address, trust);
-}
+};
 
 /* ***** HELPERS ***** */
 
@@ -118,6 +118,15 @@ function random_tryte() {
     const TRYTES = "ABCDEFGHIJKLMNOPQRSTUVWXYZ9";
     return TRYTES.charAt(Math.floor(Math.random()*27));
 }
+
+function copy_to_clipboard(message) {
+    let input = document.createElement('input');
+    input.value = message;
+    document.body.appendChild(input);
+    input.select();
+    document.execCommand('copy');
+    document.body.removeChild(input);
+};
 
 /* ***** GUI ***** */
 
