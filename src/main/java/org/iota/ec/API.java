@@ -53,8 +53,8 @@ class API {
                 double trust = requestJSON.getDouble("trust");
                 module.addActorToCluster(address, trust);
                 return success;
-            case "send_transfer":
-                String hash = performActionSendTransfer(requestJSON);
+            case "submit_transfer":
+                String hash = performActionSubmitTransfer(requestJSON);
                 return success.put("hash", hash);
             case "consider_tangle":
                 performActionConsiderTangle(requestJSON);
@@ -80,11 +80,11 @@ class API {
         return confidences;
     }
 
-    private String performActionSendTransfer(JSONObject requestJSON) {
+    private String performActionSubmitTransfer(JSONObject requestJSON) {
         String seed = requestJSON.getString("seed");
         int index = requestJSON.getInt("index");
-        String receiverAddress = requestJSON.getString("receiver_address");
-        String remainderAddress = requestJSON.getString("remainder_address");
+        String receiverAddress = requestJSON.getString("receiver");
+        String remainderAddress = requestJSON.getString("remainder");
         BigInteger value = new BigInteger(requestJSON.getString("value"));
         return module.sendTransfer(seed, index, receiverAddress, remainderAddress, value);
     }

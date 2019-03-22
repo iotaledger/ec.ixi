@@ -20,6 +20,16 @@
             <input type="button" value="generate addresses" onclick="refresh_wallet()">
             <table></table>
         </div>
+        <div class="section" id="transfer">
+            <h2>Transfers</h2>
+            <input type="hidden" id="transfers_seed" />
+            <input type="hidden" id="transfers_index" />
+            <input type="text" placeholder="sender address" disabled />
+            <input type="text" placeholder="remainder address" id="transfers_remainder" /><br/>
+            <input type="text" placeholder="receiver address" id="transfers_receiver" />
+            <input type="number" placeholder="value" id="transfers_value" /><br/>
+            <input type="button" value="submit" onclick="submit_transfer_button();">
+        </div>
         <div class="section" id="cluster">
             <h2>Cluster</h2>
             <input type="text" placeholder="address" id="cluster_address">

@@ -3,6 +3,12 @@ let $input_merkle_tree_depth;
 let $input_cluster_address;
 let $input_cluster_trust;
 
+let $input_transfers_seed;
+let $input_transfers_index;
+let $input_transfers_value;
+let $input_transfers_receiver;
+let $input_transfers_remainder;
+
 let $wallet_table;
 let $cluster_table;
 let $actors_table;
@@ -23,6 +29,12 @@ function init_elements() {
     $input_cluster_address = $('#cluster_address');
     $input_cluster_trust = $('#cluster_trust');
 
+    $input_transfers_seed = $('#transfers_seed');
+    $input_transfers_index = $('#transfers_index');
+    $input_transfers_value = $('#transfers_value');
+    $input_transfers_receiver = $('#transfers_receiver');
+    $input_transfers_remainder = $('#transfers_remainder');
+
     $input_seed.val(random_seed());
     $input_merkle_tree_depth.val(3);
     $input_cluster_trust.val(0.2);
@@ -30,6 +42,15 @@ function init_elements() {
     $wallet_table = $('#wallet table');
     $cluster_table = $('#cluster table');
     $actors_table = $('#actors table');
+}
+
+function submit_transfer_button() {
+    const seed = $input_transfers_seed.val();
+    const index = parseInt($input_transfers_index.val());
+    const receiver = $input_transfers_receiver.val();
+    const remainder = $input_transfers_remainder.val();
+    const value = $input_transfers_value.val();
+    submit_transfer(seed, index, receiver, remainder, value, alert);
 }
 
 function create_actor_button() {
@@ -103,6 +124,18 @@ function gen_table_row(cells, th = false) {
         $tr.append($(th ? "<th>" : "<td>").text(cell));
     });
     return $tr;
+}
+
+function submit_transfer(seed, index, receiver, remainder, value, callback) {
+    const request ={
+        "action": "submit_transfer",
+        "seed": seed,
+        "index": index,
+        "receiver": receiver,
+        "remainder": remainder,
+        "value": value
+    };
+    ec_request(request, response => callback(response['hash']));
 }
 
 
