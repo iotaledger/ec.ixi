@@ -58,7 +58,7 @@ header p {
     position: absolute;
     top: 50%;
     left: 50%;
-    width: 1200px;
+    max-width: 1200px;
     background-color: #FFF;
     outline: 9999px solid rgba(0, 0, 0, 0.7);
     transform: translate(-50%, -50%);
@@ -109,7 +109,7 @@ table {
     font-size: 14px;
     margin: 50px 0 20px 0;
     border-collapse: collapse;
-    text-align: left;
+    text-align: right;
     border-spacing: 10px;
 }
 
@@ -127,5 +127,5 @@ table td input[type=button] {
     padding: 3px 5px;
     display: inline-block;
     width: auto;
-    margin: 0 2px;
+    margin: 0 5px;
 }

@@ -121,7 +121,8 @@ class API {
         String receiverAddress = requestJSON.getString("receiver");
         String remainderAddress = requestJSON.getString("remainder");
         BigInteger value = new BigInteger(requestJSON.getString("value"));
-        return module.sendTransfer(seed, index, receiverAddress, remainderAddress, value);
+        boolean checkBalances = requestJSON.getBoolean("check_balances");
+        return module.sendTransfer(seed, index, receiverAddress, remainderAddress, value, checkBalances);
     }
 
     private void performActionCreateActor(JSONObject requestJSON) {
@@ -146,6 +147,8 @@ class API {
         List<String> addresses = module.deriveAddressesFromSeed(seed, 10);
         JSONArray balancesJSON = new JSONArray();
         for(String address : addresses) {
+            // TODO custom api function
+            module.changeInitialBalance(address, BigInteger.valueOf(100000));
             JSONObject jsonEntry = new JSONObject();
             jsonEntry.put("address", address);
             jsonEntry.put("balance", module.getBalanceOfAddress(address));

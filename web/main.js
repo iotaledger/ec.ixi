@@ -29,6 +29,8 @@ function init_elements() {
         "cluster": $('#cluster table'),
         "actors": $('#actors table'),
         "transfers": $('#transfers table'),
+        "transactions": $('#transactions table'),
+        "confidences": $('#confidences table'),
     };
 }
 
@@ -67,13 +69,27 @@ function init_functions() {
 
     const transfers_serialize = hash => [
         shorten(hash),
-        Gen.gen_cell_button("status", () => {})
+        Gen.gen_cell_button("status", () => { Gui.load_transactions(hash) })
+    ];
+
+    const transactions_serialize = entry => [
+        shorten(entry['hash']),
+        shorten(entry['address']),
+        entry['value'],
+        $("<div>").text(entry['confidence']).append(Gen.gen_cell_button("details", () => { Gui.show("confidences"); Gui.display_confidences(entry['confidences']) }))
+    ];
+
+    const confidences_serialize = entry => [
+        shorten(entry['actor']),
+        entry['confidence']
     ];
 
     Gui.display_balances = Gen.gen_display_function('wallet', ["address", "balance", ""], wallet_serialize);
     Gui.display_actors = Gen.gen_display_function("actors", ["address", ""], actors_serialize);
     Gui.display_cluster = Gen.gen_display_function("cluster", ["address", "trust", ""], cluster_serialize);
     Gui.display_transfers = Gen.gen_display_function("transfers", ["transfer", ""], transfers_serialize);
+    Gui.display_transactions = Gen.gen_display_function("transactions", ["hash", "address", "value", "confidence"], transactions_serialize);
+    Gui.display_confidences = Gen.gen_display_function("confidences", ["actor", "confidence"], confidences_serialize);
 }
 
 /* ***** BUTTON ACTIONS ***** */
@@ -84,7 +100,7 @@ Btn.submit_transfer = () => {
     const receiver = val("transfers_receiver");
     const remainder = val("transfers_remainder");
     const value = val("transfers_value");
-    Api.submit_transfer(seed, index, receiver, remainder, value, () => { Gui.display_transfers(); Gui.hide("new_transfer") });
+    Api.submit_transfer(seed, index, receiver, remainder, value, () => { Gui.refresh_transfers(); Gui.hide("new_transfer") });
 };
 
 Btn.create_actor = () => {
@@ -148,6 +164,10 @@ Gui.refresh_transfers = () => {
     Api.get_transfers(Gui.display_transfers)
 };
 
+Gui.load_transactions = (bundle_head) => {
+    Api.get_transactions(bundle_head, (transactions) => { Gui.display_transactions(transactions); Gui.show("transactions"); });
+}
+
 Gui.handle_error = function (message) {
     console.error(message);
     alert(message);
@@ -192,7 +212,8 @@ Api.submit_transfer = function (seed, index, receiver, remainder, value, callbac
         "index": index,
         "receiver": receiver,
         "remainder": remainder,
-        "value": value
+        "value": value,
+        "check_balances": false
     };
     Api.ec_request(request, response => callback(response['hash']));
 };
@@ -201,8 +222,8 @@ Api.get_transfers = function (callback) {
     Api.ec_request({"action": "get_transfers"}, response => callback(response['transfers']));
 };
 
-Api.get_transactions = function (callback) {
-    Api.ec_request({"action": "get_transactions"}, response => callback(response['transactions']));
+Api.get_transactions = function (bundle_head, callback) {
+    Api.ec_request({"action": "get_transactions", "bundle_head": bundle_head}, response => callback(response['transactions']));
 };
 
 Api.get_balances = function (seed, callback) {

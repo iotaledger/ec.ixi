@@ -1,6 +1,7 @@
 package org.iota.ec;
 
 import org.iota.ict.ec.AutonomousEconomicActor;
+import org.iota.ict.ec.ControlledEconomicActor;
 import org.iota.ict.ec.EconomicCluster;
 import org.iota.ict.ec.TrustedEconomicActor;
 import org.iota.ict.ixi.Ixi;
@@ -13,6 +14,7 @@ import org.iota.ict.model.transaction.Transaction;
 import org.iota.ict.model.transfer.InputBuilder;
 import org.iota.ict.model.transfer.OutputBuilder;
 import org.iota.ict.model.transfer.TransferBuilder;
+import org.iota.ict.utils.Trytes;
 import org.iota.ict.utils.crypto.AutoIndexedMerkleTree;
 import org.iota.ict.utils.crypto.SignatureSchemeImplementation;
 
@@ -38,7 +40,9 @@ public class ECModule extends IxiModule {
         super(ixi);
         this.cluster = new EconomicCluster(ixi);
         this.api = new API(this);
-        transfers.add("TESTTRANSFER999999999999999999999999999999999999999999999999999999999999999999999");
+        transfers.add("999999999999999999999999999999999999999999999999999999999999999999999999999999999");
+        addActorToCluster(Trytes.randomSequenceOfLength(81), 0.3);
+        addActorToCluster(Trytes.randomSequenceOfLength(81), 0.7);
     }
 
     /****** IXI ******/
@@ -91,11 +95,11 @@ public class ECModule extends IxiModule {
         trustedActors.add(trustedEconomicActor);
     }
 
-    String sendTransfer(String seed, int index, String receiverAddress, String remainderAddress, BigInteger value) {
+    String sendTransfer(String seed, int index, String receiverAddress, String remainderAddress, BigInteger value, boolean checkBalances) {
         SignatureSchemeImplementation.PrivateKey privateKey = SignatureSchemeImplementation.derivePrivateKeyFromSeed(seed, index, TRANSFER_SECURITY);
         BigInteger balance = getBalanceOfAddress(privateKey.deriveAddress());
         Set<String> tips = findTips(TIPS_PER_TRANSFER);
-        TransferBuilder transferBuilder = buildTransfer(privateKey, balance, receiverAddress, remainderAddress, value, tips);
+        TransferBuilder transferBuilder = buildTransfer(privateKey, balance, receiverAddress, remainderAddress, value, tips, checkBalances);
         return submitTransfer(transferBuilder);
     }
 
@@ -141,10 +145,10 @@ public class ECModule extends IxiModule {
         return addresses;
     }
 
-    private TransferBuilder buildTransfer(SignatureSchemeImplementation.PrivateKey privateKey, BigInteger balance, String receiverAddress, String remainderAddress, BigInteger value, Set<String> references) {
-        if(balance.compareTo(value) < 0)
+    private TransferBuilder buildTransfer(SignatureSchemeImplementation.PrivateKey privateKey, BigInteger balance, String receiverAddress, String remainderAddress, BigInteger value, Set<String> references, boolean checkBalances) {
+        if(balance.compareTo(value) < 0 && checkBalances)
             throw new IllegalArgumentException("insufficient balance (balance="+balance+" < value="+value+")");
-        InputBuilder inputBuilder = new InputBuilder(privateKey, balance);
+        InputBuilder inputBuilder = new InputBuilder(privateKey, BigInteger.ZERO.subtract(balance));
         Set<OutputBuilder> outputs = new HashSet<>();
         outputs.add(new OutputBuilder(receiverAddress, value, "EC9RECEIVER"));
         outputs.add(new OutputBuilder(remainderAddress, balance.subtract(value), "EC9REMAINDER"));
@@ -176,6 +180,13 @@ public class ECModule extends IxiModule {
         String hash = bundle.getHead().hash;
         transfers.add(hash);
         return hash;
+    }
+
+    public void changeInitialBalance(String address, BigInteger change) {
+        initialBalances.put(address, initialBalances.getOrDefault(address, BigInteger.ZERO).add(change));
+        for(AutonomousEconomicActor actor : autonomousActors) {
+            // TODO update actor
+        }
     }
 
     /****** GETTERS *****/

@@ -39,7 +39,8 @@
             <table></table>
         </div>
 
-        <div class="dialog hidden" id="new_transfer"><h2>New Transfer</h2>
+        <div class="dialog hidden" id="new_transfer">
+            <h2>New Transfer</h2>
             <input type="hidden" id="transfers_seed" />
             <input type="hidden" id="transfers_index" />
             <input type="text" placeholder="sender address" id="transfers_sender" disabled />
@@ -48,6 +49,18 @@
             <input type="number" placeholder="value" id="transfers_value" step="1" min="0" max="2800000000000000"/>
             <input type="button" value="submit" onclick="Btn.submit_transfer();">
             <input type="button" value="cancel" onclick="Gui.hide('new_transfer');">
+        </div>
+
+        <div class="dialog hidden" id="transactions">
+            <h2>Inspect Transfer</h2>
+            <table></table>
+            <input type="button" value="close" onclick="Gui.hide('transactions');">
+        </div>
+
+        <div class="dialog hidden" id="confidences">
+            <h2>Confidences by Actor</h2>
+            <table></table>
+            <input type="button" value="close" onclick="Gui.hide('confidences');">
         </div>
     </div>
 </body>
