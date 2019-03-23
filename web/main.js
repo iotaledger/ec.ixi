@@ -1,4 +1,5 @@
-// elements
+var toastr;
+
 const $inputs = {};
 let $tables;
 
@@ -95,6 +96,8 @@ function init_functions() {
 /* ***** BUTTON ACTIONS ***** */
 
 Btn.submit_transfer = () => {
+    if(!Gui.validate_form('new_transfer'))
+        return;
     const seed = val("transfers_seed");
     const index = parseInt(val("transfers_index"));
     const receiver = val("transfers_receiver");
@@ -166,15 +169,32 @@ Gui.refresh_transfers = () => {
 
 Gui.load_transactions = (bundle_head) => {
     Api.get_transactions(bundle_head, (transactions) => { Gui.display_transactions(transactions); Gui.show("transactions"); });
-}
+};
 
 Gui.handle_error = function (message) {
-    console.error(message);
-    alert(message);
+    toastr.error(message);
+    console.log(message);
 };
 
 Gui.hide = (id) => { $('#'+id).addClass("hidden"); };
 Gui.show = (id) => { $('#'+id).removeClass("hidden"); };
+
+Gui.validate_form = (id) => {
+    const $form_inputs = $('#'+id+" input");
+    for(let i = 0; i < $form_inputs.length; i++) {
+        const $el = $($form_inputs[i]);
+        const pattern = $el.attr("pattern");
+        const regex = new RegExp(pattern);
+        if(pattern && !$el.val().match(regex)) {
+            $el.addClass("invalid");
+            Gui.handle_error("field '" + $el.attr("id") + "' does not match expected pattern: " + pattern);
+            return false;
+        }
+        $el.removeClass("invalid");
+    }
+
+    return true;
+}
 
 /* ***** GENERATORS ***** */
 

@@ -84,8 +84,15 @@ input {
     width: 300px;
     font-size: 14px;
     margin: 5px;
+    transition: background-color 0.2s;
 }
 
+input.invalid {
+    background-color: #FF8888;
+    color: #FFF;
+}
+
+input[type=submit],
 input[type=button] {
     background-color: #44B;
     color: #FFFFFF;
