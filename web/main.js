@@ -1,5 +1,3 @@
-var toastr;
-
 const $inputs = {};
 let $tables;
 
@@ -172,7 +170,7 @@ Gui.load_transactions = (bundle_head) => {
 };
 
 Gui.handle_error = function (message) {
-    toastr.error(message);
+    swal("Whoops!", message, "error");
     console.log(message);
 };
 
@@ -194,7 +192,7 @@ Gui.validate_form = (id) => {
     }
 
     return true;
-}
+};
 
 /* ***** GENERATORS ***** */
 
@@ -284,7 +282,7 @@ Api.ajax = (path, data, success) => {
         dataType: "json",
         success: success,
         error: function (error) {
-            alert(JSON.stringify(error));
+            Gui.handle_error(JSON.stringify(error));
         }
     });
 };

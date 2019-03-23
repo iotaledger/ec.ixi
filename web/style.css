@@ -10,6 +10,10 @@ body {
     font-size: 0;
 }
 
+.toast {
+    font-size: 14px;
+}
+
 header {
     padding: 30px 70px;
     background-color: #44B;
