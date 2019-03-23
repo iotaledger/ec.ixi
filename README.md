@@ -10,6 +10,8 @@ consensus with others on the confirmation state of transactions.
 
 ## Installation
 
+### Simple Installation (Download)
+
 Make sure the version of your Ict node is `0.6` or higher. Otherwise you have to update it first.
 
 1) Open the Web GUI of your Ict node. It is usually hosted on `http://{HOST}:2187`.
@@ -17,6 +19,25 @@ Make sure the version of your Ict node is `0.6` or higher. Otherwise you have to
 3) Enter the repository `iotaledger/ec.ixi` and click on **INSTALL**.
 4) After the module has been installed successfully, reload the page. In the **IXI MODULES** section you should now
 find a new tab **EC.IXI**. Click on it to visit the EC web GUI.
+
+### Advanced Installation (Building)
+
+You will need **Git**, **NPM** and **Gradle**. Assuming that your ict directory is `~/Desktop/ict`:
+
+```shell
+# 1) Download the source code.
+git clone https://github.com/iotaledger/ec.ixi
+cd ec.ixi
+
+# 2) Download the dependencies required for the EC.ixi web GUI.
+cd web
+npm install
+cd ../
+
+# 3) Build the .jar file and move it to your ict node's modules directory.
+gradle ixi
+mv ec.ixi-{VERSION}.jar ~/Desktop/ict/modules
+```
 
 ## Usage
 
