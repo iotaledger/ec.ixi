@@ -2,9 +2,6 @@
 const $inputs = {};
 let $tables;
 
-// functions
-let display_balances, display_actors, display_cluster, display_transfers;
-
 // namespaces
 const Gui = {};
 const Gen = {};
@@ -72,10 +69,10 @@ function init_functions() {
         Gen.gen_cell_button("status", () => {})
     ];
 
-    display_balances = Gen.gen_display_function('wallet', ["address", "balance", ""], wallet_serialize);
-    display_actors = Gen.gen_display_function("actors", ["address", ""], actors_serialize);
-    display_cluster = Gen.gen_display_function("cluster", ["address", "trust", ""], cluster_serialize);
-    display_transfers = Gen.gen_display_function("transfers", ["transfer", ""], transfers_serialize);
+    Gui.display_balances = Gen.gen_display_function('wallet', ["address", "balance", ""], wallet_serialize);
+    Gui.display_actors = Gen.gen_display_function("actors", ["address", ""], actors_serialize);
+    Gui.display_cluster = Gen.gen_display_function("cluster", ["address", "trust", ""], cluster_serialize);
+    Gui.display_transfers = Gen.gen_display_function("transfers", ["transfer", ""], transfers_serialize);
 }
 
 /* ***** BUTTON ACTIONS ***** */
@@ -86,19 +83,19 @@ Btn.submit_transfer = () => {
     const receiver = val("transfers_receiver");
     const remainder = val("transfers_remainder");
     const value = val("transfers_value");
-    submit_transfer(seed, index, receiver, remainder, value, alert);
+    Api.submit_transfer(seed, index, receiver, remainder, value, alert);
 };
 
 Btn.create_actor = () => {
     const merkle_tree_depth = parseInt(val("merkle_tree_depth"));
     const seed = random_trytes(81);
-    create_actor(seed, merkle_tree_depth, 0);
+    Api.create_actor(seed, merkle_tree_depth, 0);
 };
 
 Btn.add_actor = () => {
     const address = val("cluster_address");
     const trust = parseFloat(val("cluster_trust"));
-    add_actor(address, trust);
+    Api.add_actor(address, trust);
 };
 
 /* ***** HELPERS ***** */
@@ -126,7 +123,7 @@ function copy_to_clipboard(message) {
     input.select();
     document.execCommand('copy');
     document.body.removeChild(input);
-};
+}
 
 /* ***** GUI ***** */
 
@@ -135,19 +132,19 @@ function copy_to_clipboard(message) {
  * Loads and displays the addresses with their respective balances in the wallet section.
  * */
 Gui.refresh_wallet = () => {
-    get_balances(val("seed"), display_balances);
+    Api.get_balances(val("seed"), Gui.display_balances);
 };
 
 Gui.refresh_actors = () => {
-    get_actors(display_actors);
+    Api.get_actors(Gui.display_actors);
 };
 
 Gui.refresh_cluster = () => {
-    get_cluster(display_cluster)
+    Api.get_cluster(Gui.display_cluster)
 };
 
 Gui.refresh_transfers = () => {
-    get_transfers(display_transfers)
+    Api.get_transfers(Gui.display_transfers)
 };
 
 /* ***** GENERATORS ***** */
@@ -179,7 +176,7 @@ Gen.gen_cell_button = (name, onclick) => $("<input>").attr("type", "button").val
 
 /* ***** API WRAPPERS ***** */
 
-function submit_transfer(seed, index, receiver, remainder, value, callback) {
+Api.submit_transfer = function (seed, index, receiver, remainder, value, callback) {
     const request ={
         "action": "submit_transfer",
         "seed": seed,
@@ -189,53 +186,35 @@ function submit_transfer(seed, index, receiver, remainder, value, callback) {
         "value": value
     };
     Api.ec_request(request, response => callback(response['hash']));
-}
+};
 
-function get_transfers(callback) {
+Api.get_transfers = function (callback) {
     Api.ec_request({"action": "get_transfers"}, response => callback(response['transfers']));
-}
+};
 
-/**
- * @param seed {string} The seed to derive the addresses from.
- * @param {get_balances_callback} callback
- * */
-function get_balances(seed, callback) {
-    /**
-     * @callback get_balances_callback
-     * @param {json} balances map of the addresses derived from this seed with their respective balances in iotas
-     */
+Api.get_transactions = function (callback) {
+    Api.ec_request({"action": "get_transactions"}, response => callback(response['transactions']));
+};
+
+Api.get_balances = function (seed, callback) {
     Api.ec_request({"action": "get_balances", "seed": seed}, response => callback(response['balances']));
-}
+};
 
-/**
- * @param {get_actors_callback} callback
- * */
-function get_actors(callback) {
-    /**
-     * @callback get_actors_callback
-     * @param {array} addresses of all actors
-     */
+Api.get_actors = function (callback) {
     Api.ec_request({"action": "get_actors"}, response => callback(response['actors']));
-}
+};
 
-/**
- * @param {get_cluster_callback} callback
- * */
-function get_cluster(callback) {
-    /**
-     * @callback get_cluster_callback
-     * @param {array} list of actors (json object with string field 'address' and double field 'trust')
-     */
+Api.get_cluster = function (callback) {
     Api.ec_request({"action": "get_cluster"}, response => callback(response['cluster']));
-}
+};
 
-function create_actor(seed, merkle_tree_depth, start_index) {
+Api.create_actor = function (seed, merkle_tree_depth, start_index) {
     Api.ec_request({"action": "create_actor", "seed": seed, "merkle_tree_depth": merkle_tree_depth, "start_index": start_index}, Gui.refresh_actors);
-}
+};
 
-function add_actor(address, trust) {
+Api.add_actor = function (address, trust) {
     Api.ec_request({"action": "add_actor", "address": address, "trust": trust}, Gui.refresh_cluster);
-}
+};
 
 /* ***** API ***** */
 

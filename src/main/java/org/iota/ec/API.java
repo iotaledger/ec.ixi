@@ -2,6 +2,8 @@ package org.iota.ec;
 
 import org.iota.ict.ec.AutonomousEconomicActor;
 import org.iota.ict.ec.TrustedEconomicActor;
+import org.iota.ict.model.bundle.Bundle;
+import org.iota.ict.model.transaction.Transaction;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -47,6 +49,10 @@ class API {
             case "get_transfers":
                 JSONArray transfersJSON = new JSONArray(module.getTransfers());
                 return success.put("transfers", transfersJSON);
+            case "get_transactions":
+                String bundleHead = requestJSON.getString("bundle_head");
+                JSONArray transactionsJSON = getTransactionsJSON(bundleHead);
+                return success.put("transactions", transactionsJSON);
             /* ***** DO ***** */
             case "create_actor":
                 performActionCreateActor(requestJSON);
@@ -65,6 +71,32 @@ class API {
             default:
                 throw new IllegalArgumentException("unknown action '"+action+"'");
         }
+    }
+
+    private JSONArray getTransactionsJSON(String bundleHead) {
+        JSONArray transactionsJSON = new JSONArray();
+        Bundle bundle = module.getBundle(bundleHead);
+        for(Transaction transaction : bundle.getTransactions()) {
+            JSONObject entry = new JSONObject();
+            entry.put("hash", transaction.hash);
+            entry.put("address", transaction.address());
+            entry.put("value", transaction.value);
+            entry.put("confidences", getConfidenceByEachActor(transaction.hash));
+            entry.put("confidence", module.getConfidence(transaction.hash));
+            transactionsJSON.put(entry);
+        }
+        return transactionsJSON;
+    }
+
+    private JSONArray getConfidenceByEachActor(String hash) {
+        JSONArray confidences = new JSONArray();
+        for(TrustedEconomicActor actor : module.getTrustedActors()) {
+            JSONObject entry = new JSONObject();
+            entry.put("actor", actor.getAddress());
+            entry.put("confidence", actor.getConfidence(hash));
+            confidences.put(entry);
+        }
+        return confidences;
     }
 
     private void performActionConsiderTangle(JSONObject requestJSON) {

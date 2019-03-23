@@ -74,6 +74,11 @@ public class ECModule extends IxiModule {
         return cluster.determineApprovalConfidence(hash);
     }
 
+    double getConfidenceByActor(String hash, String actorAddress) {
+        TrustedEconomicActor actor = findTrustedActor(actorAddress);
+        return actor == null ? -1 : actor.getConfidence(hash);
+    }
+
     void createNewActor(String seed, int merkleTreeDepth, int startIndex) {
         AutoIndexedMerkleTree merkleTree = new AutoIndexedMerkleTree(seed, 3, merkleTreeDepth, startIndex);
         AutonomousEconomicActor actor = new AutonomousEconomicActor(ixi, cluster, initialBalances, merkleTree);
@@ -107,10 +112,22 @@ public class ECModule extends IxiModule {
         return sum;
     }
 
+    Bundle getBundle(String bundleHead) {
+        return new Bundle(ixi.findTransactionByHash(bundleHead));
+    }
+
     /****** HELPERS ******/
 
     private AutonomousEconomicActor findAutonomousActor(String address) {
         for(AutonomousEconomicActor actor : autonomousActors) {
+            if(actor.getAddress().equals(address))
+                return actor;
+        }
+        return null;
+    }
+
+    private TrustedEconomicActor findTrustedActor(String address) {
+        for(TrustedEconomicActor actor : trustedActors) {
             if(actor.getAddress().equals(address))
                 return actor;
         }
