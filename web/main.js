@@ -44,6 +44,7 @@ function init_functions() {
         val("transfers_receiver", "");
         val("transfers_remainder", "");
         val("transfers_value", balance);
+        Gui.show("new_transfer")
     };
 
     const wallet_serialize = (entry, index) => [
@@ -83,7 +84,7 @@ Btn.submit_transfer = () => {
     const receiver = val("transfers_receiver");
     const remainder = val("transfers_remainder");
     const value = val("transfers_value");
-    Api.submit_transfer(seed, index, receiver, remainder, value, alert);
+    Api.submit_transfer(seed, index, receiver, remainder, value, () => { Gui.display_transfers(); Gui.hide("new_transfer") });
 };
 
 Btn.create_actor = () => {
@@ -146,6 +147,14 @@ Gui.refresh_cluster = () => {
 Gui.refresh_transfers = () => {
     Api.get_transfers(Gui.display_transfers)
 };
+
+Gui.handle_error = function (message) {
+    console.error(message);
+    alert(message);
+};
+
+Gui.hide = (id) => { $('#'+id).addClass("hidden"); };
+Gui.show = (id) => { $('#'+id).removeClass("hidden"); };
 
 /* ***** GENERATORS ***** */
 
@@ -221,7 +230,7 @@ Api.add_actor = function (address, trust) {
 Api.ec_request = (request, success) => {
     Api.ajax("getModuleResponse", {"request": JSON.stringify(request), "path": "ec.ixi-1.0.jar"}, data => {
         const response = JSON.parse(data['response']);
-        response['success'] ? (success ? success(response) : {}) : console.error("api error: " + response['error']);
+        response['success'] ? (success ? success(response) : {}) : Gui.handle_error("api error: " + response['error']);
     });
 };
 

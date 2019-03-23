@@ -54,7 +54,22 @@ header p {
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
 }
 
-.section h2 {
+.dialog {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 1200px;
+    background-color: #FFF;
+    outline: 9999px solid rgba(0, 0, 0, 0.7);
+    transform: translate(-50%, -50%);
+    padding: 30px 50px;
+}
+
+.hidden {
+    display: none;
+}
+
+h2 {
     text-align: center;
     font-size: 24px;
     font-weight: normal;

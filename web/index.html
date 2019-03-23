@@ -22,13 +22,6 @@
         </div>
         <div class="section" id="transfers">
             <h2>Transfers</h2>
-            <input type="hidden" id="transfers_seed" />
-            <input type="hidden" id="transfers_index" />
-            <input type="text" placeholder="sender address" id="transfers_sender" disabled />
-            <input type="text" placeholder="remainder address" id="transfers_remainder" /><br/>
-            <input type="text" placeholder="receiver address" id="transfers_receiver" />
-            <input type="number" placeholder="value" id="transfers_value" step="1" min="0" max="2800000000000000"/>
-            <input type="button" value="submit" onclick="Btn.submit_transfer();">
             <table></table>
         </div>
         <div class="section" id="cluster">
@@ -44,6 +37,17 @@
             <input type="number" placeholder="merkle tree depth" id="merkle_tree_depth" step="1" min="1" max="6">
             <input type="button" value="create" onclick="Btn.create_actor();">
             <table></table>
+        </div>
+
+        <div class="dialog hidden" id="new_transfer"><h2>New Transfer</h2>
+            <input type="hidden" id="transfers_seed" />
+            <input type="hidden" id="transfers_index" />
+            <input type="text" placeholder="sender address" id="transfers_sender" disabled />
+            <input type="text" placeholder="remainder address" id="transfers_remainder" />
+            <input type="text" placeholder="receiver address" id="transfers_receiver" /><br/>
+            <input type="number" placeholder="value" id="transfers_value" step="1" min="0" max="2800000000000000"/>
+            <input type="button" value="submit" onclick="Btn.submit_transfer();">
+            <input type="button" value="cancel" onclick="Gui.hide('new_transfer');">
         </div>
     </div>
 </body>
