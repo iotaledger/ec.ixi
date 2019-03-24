@@ -1,8 +1,7 @@
 package org.iota.ec;
 
-import org.eclipse.jetty.util.IO;
-import org.iota.ict.ec.AutonomousEconomicActor;
-import org.iota.ict.ec.TrustedEconomicActor;
+import org.iota.ec.model.AutonomousEconomicActor;
+import org.iota.ec.model.TrustedEconomicActor;
 import org.json.JSONArray;
 import org.json.JSONObject;
 

@@ -1,10 +1,8 @@
 package org.iota.ec;
 
-import org.iota.ict.ec.AutonomousEconomicActor;
-import org.iota.ict.ec.EconomicCluster;
-import org.iota.ict.ec.TrustedEconomicActor;
-import org.iota.ict.eee.EffectListener;
-import org.iota.ict.eee.Environment;
+import org.iota.ec.model.AutonomousEconomicActor;
+import org.iota.ec.model.TrustedEconomicActor;
+import org.iota.ec.model.EconomicCluster;
 import org.iota.ict.ixi.Ixi;
 import org.iota.ict.ixi.IxiModule;
 import org.iota.ict.ixi.context.IxiContext;

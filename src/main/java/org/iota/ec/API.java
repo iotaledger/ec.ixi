@@ -1,7 +1,7 @@
 package org.iota.ec;
 
-import org.iota.ict.ec.AutonomousEconomicActor;
-import org.iota.ict.ec.TrustedEconomicActor;
+import org.iota.ec.model.AutonomousEconomicActor;
+import org.iota.ec.model.TrustedEconomicActor;
 import org.iota.ict.model.bundle.Bundle;
 import org.iota.ict.model.transaction.Transaction;
 import org.json.JSONArray;
@@ -21,7 +21,6 @@ class API {
     String processRequest(String request) {
         JSONObject response;
         try {
-            System.out.println("--> " + request);
             JSONObject requestJSON = new JSONObject(request);
             String action = requestJSON.getString("action");
             response = performAction(action, requestJSON);
