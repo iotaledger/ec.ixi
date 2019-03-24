@@ -84,6 +84,10 @@ class API {
             case "issue_marker":
                 performActionIssueMarker(requestJSON);
                 return success;
+            case "change_balance": {
+                performActionChangeBalance(requestJSON);
+                return success;
+            }
             default:
                 throw new IllegalArgumentException("unknown action '"+action+"'");
         }
@@ -115,6 +119,12 @@ class API {
             confidences.put(entry);
         }
         return confidences;
+    }
+
+    private void performActionChangeBalance(JSONObject requestJSON) {
+        String address = requestJSON.getString("address");
+        BigInteger toAdd = new BigInteger(requestJSON.getString("to_add"));
+        module.changeInitialBalance(address, toAdd);
     }
 
     private void performActionIssueMarker(JSONObject requestJSON) {
@@ -160,11 +170,10 @@ class API {
     }
 
     private JSONArray getBalancesJSON(String seed) {
-        List<String> addresses = module.deriveAddressesFromSeed(seed, 10);
+        List<String> addresses = ECModule.deriveAddressesFromSeed(seed, 10);
         JSONArray balancesJSON = new JSONArray();
         for(String address : addresses) {
             // TODO custom api function
-            module.changeInitialBalance(address, BigInteger.valueOf(100000));
             JSONObject jsonEntry = new JSONObject();
             jsonEntry.put("address", address);
             jsonEntry.put("balance", module.getBalanceOfAddress(address));

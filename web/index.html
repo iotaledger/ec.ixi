@@ -25,14 +25,21 @@
             <h2>Transfers</h2>
             <table></table>
         </div>
-        <form class="section" id="cluster">
+        <div class="section" id="cluster">
             <h2>Cluster</h2>
-            <input type="text" placeholder="address" id="cluster_address" pattern="[A-Z9]{30,81}">
-            <input type="number" placeholder="trust" id="cluster_trust" step="0.01" min="0" max="1000000">
-            <input type="button" value="add" onclick="Btn.set_trust();">
+            <form id="change_balance">
+                <input type="text" placeholder="address" id="change_balance_address" pattern="[A-Z9]{30,81}">
+                <input type="number" placeholder="to add" id="change_balance_to_add" pattern="[0-9]+" step="1" min="-2800000000000000" max="2800000000000000">
+                <input type="button" value="change balance" onclick="Btn.change_balance();">
+            </form>
+            <form id="set_trust">
+                <input type="text" placeholder="address" id="cluster_address" pattern="[A-Z9]{81}">
+                <input type="number" placeholder="trust" id="cluster_trust" step="0.01" min="0" max="1000000">
+                <input type="button" value="add" onclick="Btn.set_trust();">
+            </form>
             <table>
             </table>
-        </form>
+        </div>
         <form class="section" id="actors">
             <h2>Actors</h2>
             <input type="number" placeholder="merkle tree depth" id="merkle_tree_depth" step="1" min="1" max="7" pattern="[1-7]">

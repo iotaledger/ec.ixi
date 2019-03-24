@@ -131,11 +131,19 @@ Btn.create_actor = () => {
 };
 
 Btn.set_trust = () => {
-    if(!Gui.validate_form('cluster'))
+    if(!Gui.validate_form('set_trust'))
         return;
     const address = val("cluster_address");
     const trust = parseFloat(val("cluster_trust"));
     Api.set_trust(address, trust);
+};
+
+Btn.change_balance = () => {
+    if(!Gui.validate_form('change_balance'))
+        return;
+    const address = val("change_balance_address");
+    const to_add = val("change_balance_to_add");
+    Api.change_balance(address, to_add);
 };
 
 /* ***** HELPERS ***** */
@@ -292,6 +300,10 @@ Api.remove_transfer = function (transfer) {
 
 Api.set_trust = function (address, trust) {
     Api.ec_request({"action": "set_trust", "address": address, "trust": trust}, Gui.refresh_cluster);
+};
+
+Api.change_balance = function (address, to_add) {
+    Api.ec_request({"action": "change_balance", "address": address, "to_add": to_add}, Gui.refresh_wallet);
 };
 
 /* ***** API ***** */
