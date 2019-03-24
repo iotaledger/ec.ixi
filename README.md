@@ -39,11 +39,26 @@ gradle ixi
 mv ec.ixi-{VERSION}.jar ~/Desktop/ict/modules
 ```
 
-## Usage
+## Using EC.ixi
 
-```java
-// TODO
-```
+### Step 1: Create your Cluster
+
+- In the **Actors** section, create a new actor (or more). This section contains all actors controlled by you.
+- Add the actor in your **Cluster** section with a positive trust value (e.g. `0.2`). This section contains all actors you base your confirmation on. It can include both  actors you control as well as actors from other people.
+
+### Step 2: Issue a new Transfer
+
+- Enter a random tryte sequence as seed (**never use a real seed!**) in your **Wallet** section and generate addresses.
+- Choose one of those addresses and change its initial balance (e.g. by 1000 iotas) in the **Cluster** section. This will give you some tokens to play around with. It will only be recognized by the actors controlled by you.
+- In the **Wallet** section click on the **send** button and issue a new transfer.
+- A new transfer should now appear in your **Transfer** section. When clicking on **status**, the confidence for each transaction should be `0`.
+
+### Step 3: Send a Marker
+
+- In **Actors**, click on the **issue** button of your actor.
+- Enter the hash displayed in your **Transfer** section into the **branch** and the **trunk** field and click on **issue**.
+- When clicking on the **markers** button of the same actor under **Cluster**, you should now see one entry with a confidence of `0.05`.
+- Click on the **status** button of the transfer in **Transfers**, the confidence should now be positive. When going on **details**, you should see one entry with `0.05`.
 
 ## Disclaimer
 
