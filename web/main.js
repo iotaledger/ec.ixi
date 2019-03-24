@@ -67,7 +67,8 @@ function init_functions() {
 
     const transfers_serialize = hash => [
         shorten(hash),
-        Gen.gen_cell_button("status", () => { Gui.load_transactions(hash) })
+        $("<div>").append(Gen.gen_cell_button("status", () => { Gui.load_transactions(hash) }))
+            .append(Gen.gen_cell_button("✘", () => { Api.remove_transfer(hash) }))
     ];
 
     const transactions_serialize = entry => [
@@ -262,6 +263,10 @@ Api.create_actor = function (seed, merkle_tree_depth, start_index) {
 
 Api.remove_actor = function (address) {
     Api.ec_request({"action": "delete_actor", "address": address}, Gui.refresh_actors);
+};
+
+Api.remove_transfer = function (transfer) {
+    Api.ec_request({"action": "unwatch_transfer", "transfer": transfer}, Gui.refresh_transfers);
 };
 
 Api.set_trust = function (address, trust) {

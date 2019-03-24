@@ -72,6 +72,11 @@ class API {
                 performActionDeleteActor(requestJSON);
                 Persistence.store(module);
                 return success;
+            case "unwatch_transfer":
+                String transfer = requestJSON.getString("transfer");
+                module.unwatchTransfer(transfer);
+                Persistence.store(module);
+                return success;
             case "submit_transfer":
                 String hash = performActionSubmitTransfer(requestJSON);
                 Persistence.store(module);
