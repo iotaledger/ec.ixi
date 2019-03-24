@@ -53,6 +53,10 @@ class API {
                 String bundleHead = requestJSON.getString("bundle_head");
                 JSONArray transactionsJSON = getTransactionsJSON(bundleHead);
                 return success.put("transactions", transactionsJSON);
+            case "get_markers":
+                String actor = requestJSON.getString("actor");
+                JSONArray markersJSON = module.getMarkers(actor);
+                return success.put("markers", markersJSON);
             /* ***** DO ***** */
             case "create_actor":
                 performActionCreateActor(requestJSON);

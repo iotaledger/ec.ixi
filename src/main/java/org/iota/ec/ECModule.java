@@ -16,6 +16,8 @@ import org.iota.ict.model.transfer.TransferBuilder;
 import org.iota.ict.utils.Trytes;
 import org.iota.ict.utils.crypto.AutoIndexedMerkleTree;
 import org.iota.ict.utils.crypto.SignatureSchemeImplementation;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -39,9 +41,13 @@ public class ECModule extends IxiModule {
         super(ixi);
         this.cluster = new EconomicCluster(ixi);
         this.api = new API(this);
-        transfers.add("999999999999999999999999999999999999999999999999999999999999999999999999999999999");
-        setTrust(Trytes.randomSequenceOfLength(81), 0.3);
+        transfers.add(Transaction.NULL_TRANSACTION.hash);
+
+        createNewActor(Trytes.randomSequenceOfLength(81), 3, 0);
+        AutonomousEconomicActor actor = autonomousActors.get(0);
+        setTrust(actor.getAddress(), 0.3);
         setTrust(Trytes.randomSequenceOfLength(81), 0.7);
+        considerTangle(actor.getAddress(), Transaction.NULL_TRANSACTION.hash, Transaction.NULL_TRANSACTION.hash);
     }
 
     /****** IXI ******/
@@ -70,11 +76,28 @@ public class ECModule extends IxiModule {
         if(actor == null)
             throw new IllegalArgumentException("None of the actors controlled by you has the address '"+actorAddress+"'");
         // TODO validate Tangle
-        actor.buildMarker(trunk, branch, 0.05); // TODO initial confidence
+        Bundle bundle = actor.buildMarker(trunk, branch, 0.05); // TODO initial confidence
+        for(Transaction transaction : bundle.getTransactions())
+            ixi.submit(transaction);
     }
 
     double getConfidence(String hash) {
         return cluster.determineApprovalConfidence(hash);
+    }
+
+    JSONArray getMarkers(String actorAddress) {
+        TrustedEconomicActor actor = findTrustedActor(actorAddress);
+        if(actor == null)
+            throw new IllegalArgumentException("You are not following an actor with the address '"+actorAddress+"'");
+        JSONArray markers = new JSONArray();
+        for(String tangle : actor.getMarkedTangles()) {
+            JSONObject marker = new JSONObject();
+            marker.put("ref1", tangle.substring(0, 81));
+            marker.put("ref2", tangle.substring(81));
+            marker.put("confidence", -1); // TODO
+            markers.put(marker);
+        }
+        return markers;
     }
 
     double getConfidenceByActor(String hash, String actorAddress) {

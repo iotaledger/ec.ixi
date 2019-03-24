@@ -46,6 +46,7 @@ function init_functions() {
     };
 
     const wallet_serialize = (entry, index) => [
+        "#"+index,
         shorten(entry['address']),
         entry['balance'],
         $("<div>")
@@ -60,7 +61,8 @@ function init_functions() {
     const cluster_serialize = entry => [
         shorten(entry['address']),
         entry['trust'],
-        Gen.gen_cell_button("✘", () => {Api.set_trust(entry['address'], 0)})
+        $("<div>").append(Gen.gen_cell_button("markers", () => { Gui.refresh_markers(entry['address']); Gui.show("markers"); }))
+            .append(Gen.gen_cell_button("✘", () => {Api.set_trust(entry['address'], 0)}))
     ];
 
     const transfers_serialize = hash => [
@@ -72,7 +74,7 @@ function init_functions() {
         shorten(entry['hash']),
         shorten(entry['address']),
         entry['value'],
-        $("<div>").text(entry['confidence']).append(Gen.gen_cell_button("details", () => { Gui.show("confidences"); Gui.display_confidences(entry['confidences']) }))
+        $("<div>").text(entry['confidence']).append(Gen.gen_cell_button("details", () => { Gui.display_confidences(entry['confidences']); Gui.show("confidences"); }))
     ];
 
     const confidences_serialize = entry => [
@@ -80,12 +82,19 @@ function init_functions() {
         entry['confidence']
     ];
 
-    Gui.display_balances = Gen.gen_display_function('wallet', ["address", "balance", ""], wallet_serialize);
+    const markers_serialize = entry => [
+        shorten(entry['ref1']),
+        shorten(entry['ref2']),
+        entry['confidence']
+    ];
+
+    Gui.display_balances = Gen.gen_display_function('wallet', ["index", "address", "balance", ""], wallet_serialize);
     Gui.display_actors = Gen.gen_display_function("actors", ["address", ""], actors_serialize);
     Gui.display_cluster = Gen.gen_display_function("cluster", ["address", "trust", ""], cluster_serialize);
     Gui.display_transfers = Gen.gen_display_function("transfers", ["transfer", ""], transfers_serialize);
     Gui.display_transactions = Gen.gen_display_function("transactions", ["hash", "address", "value", "confidence"], transactions_serialize);
     Gui.display_confidences = Gen.gen_display_function("confidences", ["actor", "confidence"], confidences_serialize);
+    Gui.display_markers = Gen.gen_display_function("markers", ["reference #1", "reference #2", "confidence"], markers_serialize);
 }
 
 /* ***** BUTTON ACTIONS ***** */
@@ -146,6 +155,7 @@ function copy_to_clipboard(message) {
 
 /* ***** GUI ***** */
 
+Gui.refresh_markers = (actor) => Api.get_markers(actor, Gui.display_markers);
 Gui.refresh_wallet = () => Api.get_balances(val("seed"), Gui.display_balances);
 Gui.refresh_actors = () => Api.get_actors(Gui.display_actors);
 Gui.refresh_cluster = () => Api.get_cluster(Gui.display_cluster);
@@ -240,6 +250,10 @@ Api.get_actors = function (callback) {
 
 Api.get_cluster = function (callback) {
     Api.ec_request({"action": "get_cluster"}, response => callback(response['cluster']));
+};
+
+Api.get_markers = function (actor, callback) {
+    Api.ec_request({"action": "get_markers", "actor": actor}, response => callback(response['markers']));
 };
 
 Api.create_actor = function (seed, merkle_tree_depth, start_index) {

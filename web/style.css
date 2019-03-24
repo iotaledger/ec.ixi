@@ -131,6 +131,7 @@ table {
 
 table tr th {
     background-color: #DDD;
+    text-align: left;
 }
 
 table tr th,
