@@ -2,6 +2,7 @@ package org.iota.ec;
 
 import org.iota.ec.model.AutonomousEconomicActor;
 import org.iota.ec.model.TrustedEconomicActor;
+import org.iota.ec.util.SerializableAutoIndexableMerkleTree;
 import org.iota.ict.model.bundle.Bundle;
 import org.iota.ict.model.transaction.Transaction;
 import org.json.JSONArray;
@@ -31,7 +32,7 @@ class API {
         return response.toString();
     }
 
-    JSONObject performAction(String action, JSONObject requestJSON) {
+    private JSONObject performAction(String action, JSONObject requestJSON) {
         JSONObject success = new JSONObject().put("success", true);
         switch (action) {
             /* ***** GET ***** */
@@ -58,7 +59,7 @@ class API {
                 return success.put("markers", markersJSON);
             /* ***** DO ***** */
             case "create_actor":
-                performActionCreateActor(requestJSON);
+                module.createNewActor(SerializableAutoIndexableMerkleTree.fromJSON(requestJSON));
                 Persistence.store(module);
                 return success;
             case "set_trust":
@@ -80,8 +81,8 @@ class API {
                 String hash = performActionSubmitTransfer(requestJSON);
                 Persistence.store(module);
                 return success.put("hash", hash);
-            case "consider_tangle":
-                performActionConsiderTangle(requestJSON);
+            case "issue_marker":
+                performActionIssueMarker(requestJSON);
                 return success;
             default:
                 throw new IllegalArgumentException("unknown action '"+action+"'");
@@ -116,7 +117,7 @@ class API {
         return confidences;
     }
 
-    private void performActionConsiderTangle(JSONObject requestJSON) {
+    private void performActionIssueMarker(JSONObject requestJSON) {
         String actor = requestJSON.getString("actor");
         String trunk = requestJSON.getString("trunk");
         String branch = requestJSON.getString("branch");
@@ -140,13 +141,6 @@ class API {
         BigInteger value = new BigInteger(requestJSON.getString("value"));
         boolean checkBalances = requestJSON.getBoolean("check_balances");
         return module.sendTransfer(seed, index, receiverAddress, remainderAddress, value, checkBalances);
-    }
-
-    private void performActionCreateActor(JSONObject requestJSON) {
-        String seed = requestJSON.getString("seed");
-        int merkleTreeDepth = requestJSON.getInt("merkle_tree_depth");
-        int startIndex = requestJSON.getInt("start_index");
-        module.createNewActor(seed, merkleTreeDepth, startIndex);
     }
 
     private void performActionDeleteActor(JSONObject requestJSON) {

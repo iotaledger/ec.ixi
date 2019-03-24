@@ -2,6 +2,7 @@ package org.iota.ec;
 
 import org.iota.ec.model.AutonomousEconomicActor;
 import org.iota.ec.model.TrustedEconomicActor;
+import org.iota.ec.util.SerializableAutoIndexableMerkleTree;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -49,6 +50,7 @@ public class Persistence {
         JSONObject persistenceJSON = new JSONObject(read(persistence));
         deserializeTrustedActors(persistenceJSON.getJSONArray("trusted"));
         deserializeTransfers(persistenceJSON.getJSONArray("transfers"));
+        deserializeAutonomousActors(persistenceJSON.getJSONArray("autonomous"));
     }
 
     private JSONArray serializeTrustedActors() {
@@ -62,22 +64,30 @@ public class Persistence {
         return array;
     }
 
-    private JSONArray serializeAutonomousActors() {
-        JSONArray array = new JSONArray();
-        for(AutonomousEconomicActor actor : module.getAutonomousActors()) {
-            JSONObject entry = new JSONObject();
-            // TODO store merkle tree
-            array.put(entry);
-        }
-        return array;
-    }
-
     private void deserializeTrustedActors(JSONArray serialized) {
         for(int i = 0; i < serialized.length(); i++) {
             JSONObject entry = serialized.getJSONObject(i);
             String address = entry.getString("address");
             double trust = entry.getDouble("trust");
             module.setTrust(address, trust);
+        }
+    }
+
+    private JSONArray serializeAutonomousActors() {
+        JSONArray array = new JSONArray();
+        for(AutonomousEconomicActor actor : module.getAutonomousActors()) {
+            JSONObject entry = new JSONObject();
+            entry.put("merkle_tree", actor.getMerkleTree().toJSON());
+            array.put(entry);
+        }
+        return array;
+    }
+
+    private void deserializeAutonomousActors(JSONArray serialized) {
+        for(int i = 0; i < serialized.length(); i++) {
+            JSONObject entry = serialized.getJSONObject(i);
+            SerializableAutoIndexableMerkleTree merkleTree = SerializableAutoIndexableMerkleTree.fromJSON(entry.getJSONObject("merkle_tree"));
+            module.createNewActor(merkleTree);
         }
     }
 

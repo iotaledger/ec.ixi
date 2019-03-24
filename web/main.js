@@ -20,7 +20,7 @@ function init_elements() {
 
     $('input').each((_, $el) => { $inputs[$el.id] = $($el); });
     val("seed", random_trytes(81));
-    val("merkle_tree_depth",3);
+    val("merkle_tree_depth",5);
     val("cluster_trust", 0.2);
 }
 
@@ -55,7 +55,9 @@ function init_functions() {
 
     const actors_serialize = actor => [
         shorten(actor),
-        Gen.gen_cell_button("✘", () => { Api.remove_actor(actor) })
+        $("<div>")
+            .append(Gen.gen_cell_button("issue", () => { val("issue_actor", actor); Gui.show("issue"); }))
+            .append(Gen.gen_cell_button("✘", () => { Api.remove_actor(actor) }))
     ];
 
     const cluster_serialize = entry => [
@@ -109,6 +111,15 @@ Btn.submit_transfer = () => {
     const remainder = val("transfers_remainder");
     const value = val("transfers_value");
     Api.submit_transfer(seed, index, receiver, remainder, value, () => { Gui.refresh_transfers(); Gui.hide("new_transfer") });
+};
+
+Btn.issue_marker = () => {
+    if(!Gui.validate_form('issue'))
+        return;
+    const actor = val("issue_actor");
+    const branch = val("issue_branch");
+    const trunk = val("issue_trunk");
+    Api.issue_marker(actor, trunk, branch, () => { Gui.hide("issue"); });
 };
 
 Btn.create_actor = () => {
@@ -196,7 +207,7 @@ Gui.validate_form = (id) => {
 Gen.gen_display_function = function (table_name, table_head, object_serializer) {
     let $table = get_table(table_name);
     return function(objects) {
-        $table.html(Gen.gen_table_row(table_head, true));
+        $table.html(objects.length > 0 ? Gen.gen_table_row(table_head, true) : $("<tr>").append($("<td>").text("(empty)")));
         $.each(objects, function (index, object) {
             $table.append(Gen.gen_table_row(object_serializer(object, index)));
         });
@@ -233,6 +244,16 @@ Api.submit_transfer = function (seed, index, receiver, remainder, value, callbac
     Api.ec_request(request, response => callback(response['hash']));
 };
 
+Api.issue_marker = function (actor, trunk, branch, callback) {
+    const request ={
+        "action": "issue_marker",
+        "actor": actor,
+        "trunk": trunk,
+        "branch": branch,
+    };
+    Api.ec_request(request, () => callback());
+};
+
 Api.get_transfers = function (callback) {
     Api.ec_request({"action": "get_transfers"}, response => callback(response['transfers']));
 };
@@ -258,7 +279,7 @@ Api.get_markers = function (actor, callback) {
 };
 
 Api.create_actor = function (seed, merkle_tree_depth, start_index) {
-    Api.ec_request({"action": "create_actor", "seed": seed, "merkle_tree_depth": merkle_tree_depth, "start_index": start_index}, Gui.refresh_actors);
+    Api.ec_request({"action": "create_actor", "seed": seed, "depth": merkle_tree_depth, "index": start_index, "security_level": 3}, Gui.refresh_actors);
 };
 
 Api.remove_actor = function (address) {
@@ -291,7 +312,7 @@ Api.ajax = (path, data, success) => {
         dataType: "json",
         success: success,
         error: (error) => {
-            Gui.handle_error(JSON.stringify(error));
+            Gui.handle_error(error['status'] === 0 ? "Could not reach your Ict node. Is it running with API enabled on port 2187?" : JSON.stringify(error));
         }
     });
 };

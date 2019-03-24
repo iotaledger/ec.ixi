@@ -68,10 +68,10 @@ public class TrustedEconomicActor extends EconomicActor {
         return null;
     }
 
-    public Set<String> getMarkedTangles() {
-        Set<String> markedTangles = new HashSet<>();
+    public Map<String, Double> getMarkedTangles() {
+        Map<String, Double> markedTangles = new HashMap<>();
         for(SubTangle subTangle : subTanglesOrderedByDescendingConfidence)
-            markedTangles.add(subTangle.getID());
+            markedTangles.put(subTangle.getID(), subTangle.getConfidence());
         return markedTangles;
     }
 

@@ -69,6 +69,16 @@
             <table></table>
             <input type="button" value="close" onclick="Gui.hide('markers');">
         </div>
+
+        <form class="dialog hidden" id="issue">
+            <h2>Issue Marker</h2>
+            <table></table>
+            <input type="text" placeholder="trunk" id="issue_trunk" pattern="[A-Z9]{81}" />
+            <input type="text" placeholder="branch" id="issue_branch" pattern="[A-Z9]{81}" /><br/>
+            <input type="text" placeholder="actor" id="issue_actor" disabled />
+            <input type="button" value="issue" onclick="Btn.issue_marker('issue');">
+            <input type="button" value="close" onclick="Gui.hide('issue');">
+        </form>
     </div>
 </body>
 </html>

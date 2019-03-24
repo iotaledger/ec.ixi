@@ -45,6 +45,8 @@ public class LedgerValidator {
     public boolean areTanglesCompatible(String hashA, String hashB) {
         Transaction refA = ixi.findTransactionByHash(hashA);
         Transaction refB = ixi.findTransactionByHash(hashB);
+        if(refA == null) throw new IncompleteTangleException(hashA);
+        if(refB == null) throw new IncompleteTangleException(hashB);
         return isTangleSolid(merge(refA, refB));
     }
 

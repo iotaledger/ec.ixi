@@ -3,6 +3,7 @@ package org.iota.ec;
 import org.iota.ec.model.AutonomousEconomicActor;
 import org.iota.ec.model.TrustedEconomicActor;
 import org.iota.ec.model.EconomicCluster;
+import org.iota.ec.util.SerializableAutoIndexableMerkleTree;
 import org.iota.ict.ixi.Ixi;
 import org.iota.ict.ixi.IxiModule;
 import org.iota.ict.ixi.context.IxiContext;
@@ -14,7 +15,6 @@ import org.iota.ict.model.transfer.InputBuilder;
 import org.iota.ict.model.transfer.OutputBuilder;
 import org.iota.ict.model.transfer.TransferBuilder;
 import org.iota.ict.utils.Trytes;
-import org.iota.ict.utils.crypto.AutoIndexedMerkleTree;
 import org.iota.ict.utils.crypto.SignatureSchemeImplementation;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -31,7 +31,6 @@ public class ECModule extends IxiModule {
     private final API api;
     private final EconomicCluster cluster;
     private final List<AutonomousEconomicActor> autonomousActors = new LinkedList<>();
-    private final List<TrustedEconomicActor> trustedActors = new LinkedList<>();
     private final List<String> transfers = new LinkedList<>();
     private final Map<String, BigInteger> initialBalances = new HashMap<>();
 
@@ -41,10 +40,6 @@ public class ECModule extends IxiModule {
         super(ixi);
         this.cluster = new EconomicCluster(ixi);
         this.api = new API(this);
-
-        createNewActor(Trytes.randomSequenceOfLength(81), 3, 0);
-        AutonomousEconomicActor actor = autonomousActors.get(0);
-        considerTangle(actor.getAddress(), Transaction.NULL_TRANSACTION.hash, Transaction.NULL_TRANSACTION.hash);
     }
 
     /****** IXI ******/
@@ -60,7 +55,7 @@ public class ECModule extends IxiModule {
     }
 
     @Override
-    public void onStart() {
+    public void onStarted() {
         Persistence.load(this);
     }
 
@@ -81,6 +76,7 @@ public class ECModule extends IxiModule {
         AutonomousEconomicActor actor = findAutonomousActor(actorAddress);
         if(actor == null)
             throw new IllegalArgumentException("None of the actors controlled by you has the address '"+actorAddress+"'");
+        actor.tick(Collections.singleton(trunk+branch));
         // TODO validate Tangle
         Bundle bundle = actor.buildMarker(trunk, branch, 0.05); // TODO initial confidence
         for(Transaction transaction : bundle.getTransactions())
@@ -96,23 +92,17 @@ public class ECModule extends IxiModule {
         if(actor == null)
             throw new IllegalArgumentException("You are not following an actor with the address '"+actorAddress+"'");
         JSONArray markers = new JSONArray();
-        for(String tangle : actor.getMarkedTangles()) {
+        for(Map.Entry<String, Double> tangle : actor.getMarkedTangles().entrySet()) {
             JSONObject marker = new JSONObject();
-            marker.put("ref1", tangle.substring(0, 81));
-            marker.put("ref2", tangle.substring(81));
-            marker.put("confidence", -1); // TODO
+            marker.put("ref1", tangle.getKey().substring(0, 81));
+            marker.put("ref2", tangle.getKey().substring(81));
+            marker.put("confidence", tangle.getValue());
             markers.put(marker);
         }
         return markers;
     }
 
-    double getConfidenceByActor(String hash, String actorAddress) {
-        TrustedEconomicActor actor = findTrustedActor(actorAddress);
-        return actor == null ? -1 : actor.getConfidence(hash);
-    }
-
-    void createNewActor(String seed, int merkleTreeDepth, int startIndex) {
-        AutoIndexedMerkleTree merkleTree = new AutoIndexedMerkleTree(seed, 3, merkleTreeDepth, startIndex);
+    void createNewActor(SerializableAutoIndexableMerkleTree merkleTree) {
         AutonomousEconomicActor actor = new AutonomousEconomicActor(ixi, cluster, initialBalances, merkleTree);
         autonomousActors.add(actor);
     }
@@ -130,13 +120,11 @@ public class ECModule extends IxiModule {
         if((actor = findTrustedActor(address)) != null) {
             actor.setTrust(trust);
             if(trust == 0) {
-                trustedActors.remove(actor);
-                // TODO cluster.removeActor(actor);
+                cluster.removeActor(actor);
             }
         } else if(trust > 0) {
             TrustedEconomicActor trustedEconomicActor = new TrustedEconomicActor(address, trust);
             cluster.addActor(trustedEconomicActor);
-            trustedActors.add(trustedEconomicActor);
         }
     }
 
@@ -177,7 +165,7 @@ public class ECModule extends IxiModule {
     }
 
     private TrustedEconomicActor findTrustedActor(String address) {
-        for(TrustedEconomicActor actor : trustedActors) {
+        for(TrustedEconomicActor actor : cluster.getActors()) {
             if(actor.getAddress().equals(address))
                 return actor;
         }
@@ -229,10 +217,10 @@ public class ECModule extends IxiModule {
         return bundleHead;
     }
 
-    public void changeInitialBalance(String address, BigInteger change) {
-        initialBalances.put(address, initialBalances.getOrDefault(address, BigInteger.ZERO).add(change));
+    public void changeInitialBalance(String address, BigInteger toAdd) {
+        initialBalances.put(address, initialBalances.getOrDefault(address, BigInteger.ZERO).add(toAdd));
         for(AutonomousEconomicActor actor : autonomousActors) {
-            // TODO update actor
+            actor.changeInitialBalance(address, toAdd);
         }
     }
 
@@ -247,7 +235,7 @@ public class ECModule extends IxiModule {
     /****** GETTERS *****/
 
     List<TrustedEconomicActor> getTrustedActors() {
-        return new LinkedList<>(trustedActors);
+        return cluster.getActors();
     }
 
     List<AutonomousEconomicActor> getAutonomousActors() {

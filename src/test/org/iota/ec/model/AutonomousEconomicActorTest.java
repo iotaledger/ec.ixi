@@ -1,6 +1,7 @@
 package org.iota.ec.model;
 
 import org.iota.ec.IctTestTemplate;
+import org.iota.ec.util.SerializableAutoIndexableMerkleTree;
 import org.iota.ict.Ict;
 import org.iota.ict.utils.Trytes;
 import org.iota.ict.utils.crypto.AutoIndexedMerkleTree;
@@ -115,7 +116,7 @@ public class AutonomousEconomicActorTest extends IctTestTemplate {
         Assert.assertEquals("Unexpected confidence of " + transaction, expected, cluster.determineApprovalConfidence(transaction), 1E-2);
     }
 
-    private AutoIndexedMerkleTree randomMerkleTree(int depth) {
-        return new AutoIndexedMerkleTree(Trytes.randomSequenceOfLength(81), 3, depth);
+    private SerializableAutoIndexableMerkleTree randomMerkleTree(int depth) {
+        return new SerializableAutoIndexableMerkleTree(Trytes.randomSequenceOfLength(81), 3, depth);
     }
 }

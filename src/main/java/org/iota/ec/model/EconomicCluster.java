@@ -8,13 +8,12 @@ import org.iota.ict.network.gossip.GossipEvent;
 import org.iota.ict.network.gossip.GossipFilter;
 import org.iota.ict.network.gossip.GossipListener;
 import org.iota.ict.utils.Constants;
-import org.iota.ict.utils.properties.FinalProperties;
-import org.iota.ict.utils.properties.PropertiesUser;
 
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Set;
 
-public class EconomicCluster implements GossipListener, PropertiesUser {
+public class EconomicCluster implements GossipListener {
 
     private final Ixi ixi;
     private Set<TrustedEconomicActor> actors = new HashSet<>();
@@ -26,29 +25,22 @@ public class EconomicCluster implements GossipListener, PropertiesUser {
     }
 
     public void addActor(TrustedEconomicActor actor) {
+        if(filter.getWatchedAddresses().contains(actor.getAddress()))
+            throw new IllegalArgumentException("Actor " + actor.getAddress() + " already added.");
         actors.add(actor);
         filter.watchAddress(actor.getAddress());
+    }
+
+    public void removeActor(TrustedEconomicActor actor) {
+        actors.remove(actor);
+        filter.unwatchAddress(actor.getAddress());
     }
 
     public Set<String> getAllTangles() {
         Set<String> allTangles = new HashSet<>();
         for(TrustedEconomicActor actor : actors)
-            allTangles.addAll(actor.getMarkedTangles());
+            allTangles.addAll(actor.getMarkedTangles().keySet());
         return allTangles;
-    }
-
-    @Override
-    public void updateProperties(FinalProperties properties) {
-        Set<String> set = properties.economicCluster();
-        HashSet<TrustedEconomicActor> newActors = new HashSet<>();
-        for(String element : set) {
-            String[] split = element.split(":");
-            String address = split[0];
-            double trust = Double.parseDouble(split[1]);
-            actors.add(new TrustedEconomicActor(address, trust));
-        }
-
-        actors = newActors;
     }
 
     public double determineApprovalConfidence(String transactionHash) {
@@ -87,6 +79,10 @@ public class EconomicCluster implements GossipListener, PropertiesUser {
         for(TrustedEconomicActor actor : actors) {
             actor.processTransaction(transaction);
         }
+    }
+
+    public LinkedList<TrustedEconomicActor> getActors() {
+        return new LinkedList<>(actors);
     }
 
     @Override

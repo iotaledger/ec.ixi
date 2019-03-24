@@ -1,5 +1,6 @@
 package org.iota.ec.model;
 
+import org.iota.ec.util.SerializableAutoIndexableMerkleTree;
 import org.iota.ict.model.bundle.*;
 import org.iota.ict.model.transaction.Transaction;
 import org.iota.ict.model.transfer.InputBuilder;
@@ -22,9 +23,9 @@ import java.util.Set;
  * */
 public class ControlledEconomicActor extends EconomicActor {
 
-    protected final AutoIndexedMerkleTree merkleTree;
+    protected final SerializableAutoIndexableMerkleTree merkleTree;
 
-    public ControlledEconomicActor(AutoIndexedMerkleTree merkleTree) {
+    public ControlledEconomicActor(SerializableAutoIndexableMerkleTree merkleTree) {
         super(merkleTree.getAddress());
         this.merkleTree = merkleTree;
     }
@@ -38,7 +39,7 @@ public class ControlledEconomicActor extends EconomicActor {
         assert signature.deriveAddress().equals(address);
         outputs.add(new OutputBuilder(address, BigInteger.ZERO, signature.toString()));
 
-        TransferBuilder transferBuilder =  new TransferBuilder(new HashSet<InputBuilder>(), outputs, merkleTree.getSecurityLevel());
+        TransferBuilder transferBuilder =  new TransferBuilder(new HashSet<>(), outputs, merkleTree.getSecurityLevel());
         BundleBuilder bundleBuilder = transferBuilder.build();
 
         List<TransactionBuilder> tailToHead = bundleBuilder.getTailToHead();
@@ -46,5 +47,9 @@ public class ControlledEconomicActor extends EconomicActor {
         tailToHead.get(0).trunkHash = trunk;
         tailToHead.get(0).tag = encodeConfidence(confidence, Transaction.Field.TAG.tryteLength);
         return bundleBuilder.build();
+    }
+
+    public SerializableAutoIndexableMerkleTree getMerkleTree() {
+        return merkleTree;
     }
 }

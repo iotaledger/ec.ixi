@@ -1,5 +1,6 @@
 package org.iota.ec.model;
 
+import org.iota.ec.util.SerializableAutoIndexableMerkleTree;
 import org.iota.ict.ixi.Ixi;
 import org.iota.ict.model.bundle.Bundle;
 import org.iota.ict.model.transaction.Transaction;
@@ -19,7 +20,7 @@ public class AutonomousEconomicActor extends ControlledEconomicActor {
     private final Set<String> invalidTangles = new HashSet<>();
     private double aggressivity = 1.1;
 
-    public AutonomousEconomicActor(Ixi ixi, EconomicCluster economicCluster, Map<String, BigInteger> initialBalances, AutoIndexedMerkleTree merkleTree) {
+    public AutonomousEconomicActor(Ixi ixi, EconomicCluster economicCluster, Map<String, BigInteger> initialBalances, SerializableAutoIndexableMerkleTree merkleTree) {
         super(merkleTree);
         this.ixi = ixi;
         this.economicCluster = economicCluster;
@@ -30,9 +31,18 @@ public class AutonomousEconomicActor extends ControlledEconomicActor {
         this.aggressivity = aggressivity;
     }
 
-    protected void tick() {
+    public void changeInitialBalance(String address, BigInteger toAdd) {
+        ledgerValidator.changeInitialBalance(address, toAdd);
+    }
+
+    public void tick() {
+        tick(Collections.emptySet());
+    }
+
+    public void tick(Collection<String> newTangles) {
         // TODO do not consider all which is too computationally expensive
         List<String> tangles = new LinkedList<>(economicCluster.getAllTangles());
+        tangles.addAll(newTangles);
         removeInvalidTangles(tangles);
         ConfidenceCalculator confidenceCalculator = createConfidenceCalculator(tangles);
         Map<String, Double> newConfidenceByTangle = new HashMap<>();
@@ -40,7 +50,6 @@ public class AutonomousEconomicActor extends ControlledEconomicActor {
             double calculatedConfidence = confidenceCalculator.confidenceOf(tangle);
             newConfidenceByTangle.put(tangle, calculatedConfidence);
         }
-        convergeConfidences(newConfidenceByTangle);
 
         mostConfident = null;
         for(Map.Entry<String, Double> entry : newConfidenceByTangle.entrySet()) {
@@ -50,16 +59,13 @@ public class AutonomousEconomicActor extends ControlledEconomicActor {
         }
     }
 
-    protected void convergeConfidences(Map<String, Double> confidences) {
-    }
-
     protected void removeInvalidTangles(List<String> tangles) {
         for(int i = 0; i < tangles.size(); i++)
             if(!isTangleValid(tangles.get(i)))
                 tangles.remove(i--);
     }
 
-    protected boolean isTangleValid(String tangle) {
+    public boolean isTangleValid(String tangle) {
         if(validTangles.contains(tangle))
             return true;
         if(invalidTangles.contains(tangle))
@@ -72,18 +78,13 @@ public class AutonomousEconomicActor extends ControlledEconomicActor {
     }
 
     protected ConfidenceCalculator createConfidenceCalculator(List<String> tangles) {
-
-        //assert tangles.size() > 0;
-
+        assert tangles.size() > 0;
         Set<ConfidenceCalculator.Conflict> conflicts = findAllConflicts(tangles);
-
         double[] initialProbabilities = new double[tangles.size()];
-
         for(int i = 0; i < tangles.size(); i++) {
             String tangle = tangles.get(i);
             initialProbabilities[i] = guessApprovalConfidence(tangle);
         }
-
         return new ConfidenceCalculator(tangles, conflicts, initialProbabilities);
     }
 

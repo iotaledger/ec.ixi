@@ -1,6 +1,7 @@
 package org.iota.ec.model;
 
 import org.iota.ec.IctTestTemplate;
+import org.iota.ec.util.SerializableAutoIndexableMerkleTree;
 import org.iota.ict.Ict;
 import org.iota.ict.model.bundle.Bundle;
 import org.iota.ict.utils.Trytes;
@@ -15,7 +16,7 @@ public class EconomicClusterTest extends IctTestTemplate {
     @Test
     public void testOverwriteConfidence() {
         Ict ict = createIct();
-        ControlledEconomicActor ca = new ControlledEconomicActor(new AutoIndexedMerkleTree(Trytes.randomSequenceOfLength(81), 3,3));
+        ControlledEconomicActor ca = new ControlledEconomicActor(new SerializableAutoIndexableMerkleTree(Trytes.randomSequenceOfLength(81), 3,3));
         EconomicCluster cluster = new EconomicCluster(ict);
         TrustedEconomicActor ta = new TrustedEconomicActor(ca.getAddress(),0.2);
         cluster.addActor(ta);
@@ -40,7 +41,7 @@ public class EconomicClusterTest extends IctTestTemplate {
     @Test
     public void testReferencedByMultipleMarkers() {
         Ict ict = createIct();
-        ControlledEconomicActor ca = new ControlledEconomicActor(new AutoIndexedMerkleTree(Trytes.randomSequenceOfLength(81), 3,3));
+        ControlledEconomicActor ca = new ControlledEconomicActor(new SerializableAutoIndexableMerkleTree(Trytes.randomSequenceOfLength(81), 3,3));
         EconomicCluster cluster = new EconomicCluster(ict);
         TrustedEconomicActor ta = new TrustedEconomicActor(ca.getAddress(),1);
         cluster.addActor(ta);
@@ -76,9 +77,9 @@ public class EconomicClusterTest extends IctTestTemplate {
 
         Ict ict = createIct();
 
-        ControlledEconomicActor ca1 = new ControlledEconomicActor(new AutoIndexedMerkleTree(Trytes.randomSequenceOfLength(81), 3,3));
-        ControlledEconomicActor ca2 = new ControlledEconomicActor(new AutoIndexedMerkleTree(Trytes.randomSequenceOfLength(81), 3, 3));
-        ControlledEconomicActor ca3 = new ControlledEconomicActor(new AutoIndexedMerkleTree(Trytes.randomSequenceOfLength(81), 3, 3));
+        ControlledEconomicActor ca1 = new ControlledEconomicActor(new SerializableAutoIndexableMerkleTree(Trytes.randomSequenceOfLength(81), 3,3));
+        ControlledEconomicActor ca2 = new ControlledEconomicActor(new SerializableAutoIndexableMerkleTree(Trytes.randomSequenceOfLength(81), 3, 3));
+        ControlledEconomicActor ca3 = new ControlledEconomicActor(new SerializableAutoIndexableMerkleTree(Trytes.randomSequenceOfLength(81), 3, 3));
 
         EconomicCluster cluster = new EconomicCluster(ict);
         TrustedEconomicActor ta1 = new TrustedEconomicActor(ca1.getAddress(),0.2);
@@ -113,7 +114,7 @@ public class EconomicClusterTest extends IctTestTemplate {
         Ict ictB = createIct();
         connect(ictA, ictB);
 
-        ControlledEconomicActor ca = new ControlledEconomicActor(new AutoIndexedMerkleTree(Trytes.randomSequenceOfLength(81), 3,3));
+        ControlledEconomicActor ca = new ControlledEconomicActor(new SerializableAutoIndexableMerkleTree(Trytes.randomSequenceOfLength(81), 3,3));
 
         EconomicCluster cluster = new EconomicCluster(ictB);
         TrustedEconomicActor ta = new TrustedEconomicActor(ca.getAddress(),0.2);
