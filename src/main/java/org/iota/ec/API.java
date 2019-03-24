@@ -60,17 +60,21 @@ class API {
             /* ***** DO ***** */
             case "create_actor":
                 performActionCreateActor(requestJSON);
+                Persistence.store(module);
                 return success;
             case "set_trust":
                 String address = requestJSON.getString("address");
                 double trust = requestJSON.getDouble("trust");
                 module.setTrust(address, trust);
+                Persistence.store(module);
                 return success;
             case "delete_actor":
                 performActionDeleteActor(requestJSON);
+                Persistence.store(module);
                 return success;
             case "submit_transfer":
                 String hash = performActionSubmitTransfer(requestJSON);
+                Persistence.store(module);
                 return success.put("hash", hash);
             case "consider_tangle":
                 performActionConsiderTangle(requestJSON);

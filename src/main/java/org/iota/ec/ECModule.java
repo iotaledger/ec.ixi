@@ -3,6 +3,8 @@ package org.iota.ec;
 import org.iota.ict.ec.AutonomousEconomicActor;
 import org.iota.ict.ec.EconomicCluster;
 import org.iota.ict.ec.TrustedEconomicActor;
+import org.iota.ict.eee.EffectListener;
+import org.iota.ict.eee.Environment;
 import org.iota.ict.ixi.Ixi;
 import org.iota.ict.ixi.IxiModule;
 import org.iota.ict.ixi.context.IxiContext;
@@ -41,12 +43,10 @@ public class ECModule extends IxiModule {
         super(ixi);
         this.cluster = new EconomicCluster(ixi);
         this.api = new API(this);
-        transfers.add(Transaction.NULL_TRANSACTION.hash);
 
+        transfers.add(Transaction.NULL_TRANSACTION.hash);
         createNewActor(Trytes.randomSequenceOfLength(81), 3, 0);
         AutonomousEconomicActor actor = autonomousActors.get(0);
-        setTrust(actor.getAddress(), 0.3);
-        setTrust(Trytes.randomSequenceOfLength(81), 0.7);
         considerTangle(actor.getAddress(), Transaction.NULL_TRANSACTION.hash, Transaction.NULL_TRANSACTION.hash);
     }
 
@@ -60,6 +60,16 @@ public class ECModule extends IxiModule {
     @Override
     public IxiContext getContext() {
         return context;
+    }
+
+    @Override
+    public void onStart() {
+        Persistence.load(this);
+    }
+
+    @Override
+    public void onTerminate() {
+        Persistence.store(this);
     }
 
     private class ECContext extends SimpleIxiContext {
