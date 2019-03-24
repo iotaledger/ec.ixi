@@ -1,5 +1,5 @@
 const $inputs = {};
-let $tables;
+let $tables = {};
 
 // namespaces
 const Gui = {};
@@ -22,15 +22,12 @@ function init_elements() {
     val("seed", random_trytes(81));
     val("merkle_tree_depth",3);
     val("cluster_trust", 0.2);
+}
 
-    $tables = {
-        "wallet": $('#wallet table'),
-        "cluster": $('#cluster table'),
-        "actors": $('#actors table'),
-        "transfers": $('#transfers table'),
-        "transactions": $('#transactions table'),
-        "confidences": $('#confidences table'),
-    };
+function get_table(id) {
+    if(!$tables[id])
+        $tables[id] = $('#'+id+" table");
+    return $tables[id];
 }
 
 function init_functions() {
@@ -57,13 +54,13 @@ function init_functions() {
 
     const actors_serialize = actor => [
         shorten(actor),
-        Gen.gen_cell_button("✘", () => {})
+        Gen.gen_cell_button("✘", () => { Api.remove_actor(actor) })
     ];
 
     const cluster_serialize = entry => [
         shorten(entry['address']),
         entry['trust'],
-        Gen.gen_cell_button("✘", () => {})
+        Gen.gen_cell_button("✘", () => {Api.set_trust(entry['address'], 0)})
     ];
 
     const transfers_serialize = hash => [
@@ -105,15 +102,19 @@ Btn.submit_transfer = () => {
 };
 
 Btn.create_actor = () => {
+    if(!Gui.validate_form('actors'))
+        return;
     const merkle_tree_depth = parseInt(val("merkle_tree_depth"));
     const seed = random_trytes(81);
     Api.create_actor(seed, merkle_tree_depth, 0);
 };
 
-Btn.add_actor = () => {
+Btn.set_trust = () => {
+    if(!Gui.validate_form('cluster'))
+        return;
     const address = val("cluster_address");
     const trust = parseFloat(val("cluster_trust"));
-    Api.add_actor(address, trust);
+    Api.set_trust(address, trust);
 };
 
 /* ***** HELPERS ***** */
@@ -145,32 +146,17 @@ function copy_to_clipboard(message) {
 
 /* ***** GUI ***** */
 
-
-/**
- * Loads and displays the addresses with their respective balances in the wallet section.
- * */
-Gui.refresh_wallet = () => {
-    Api.get_balances(val("seed"), Gui.display_balances);
-};
-
-Gui.refresh_actors = () => {
-    Api.get_actors(Gui.display_actors);
-};
-
-Gui.refresh_cluster = () => {
-    Api.get_cluster(Gui.display_cluster)
-};
-
-Gui.refresh_transfers = () => {
-    Api.get_transfers(Gui.display_transfers)
-};
+Gui.refresh_wallet = () => Api.get_balances(val("seed"), Gui.display_balances);
+Gui.refresh_actors = () => Api.get_actors(Gui.display_actors);
+Gui.refresh_cluster = () => Api.get_cluster(Gui.display_cluster);
+Gui.refresh_transfers = () => Api.get_transfers(Gui.display_transfers);
 
 Gui.load_transactions = (bundle_head) => {
     Api.get_transactions(bundle_head, (transactions) => { Gui.display_transactions(transactions); Gui.show("transactions"); });
 };
 
 Gui.handle_error = function (message) {
-    swal("Whoops!", message, "error");
+    Swal.fire({title: "Whoops!", html: message, type: "error"});
     console.log(message);
 };
 
@@ -185,7 +171,7 @@ Gui.validate_form = (id) => {
         const regex = new RegExp(pattern);
         if(pattern && !$el.val().match(regex)) {
             $el.addClass("invalid");
-            Gui.handle_error("field '" + $el.attr("id") + "' does not match expected pattern: " + pattern);
+            Gui.handle_error("field <code>" + $el.attr("placeholder") + "</code> does not match expected pattern: <code>" + pattern+"</code>");
             return false;
         }
         $el.removeClass("invalid");
@@ -197,7 +183,7 @@ Gui.validate_form = (id) => {
 /* ***** GENERATORS ***** */
 
 Gen.gen_display_function = function (table_name, table_head, object_serializer) {
-    let $table = $tables[table_name];
+    let $table = get_table(table_name);
     return function(objects) {
         $table.html(Gen.gen_table_row(table_head, true));
         $.each(objects, function (index, object) {
@@ -260,8 +246,12 @@ Api.create_actor = function (seed, merkle_tree_depth, start_index) {
     Api.ec_request({"action": "create_actor", "seed": seed, "merkle_tree_depth": merkle_tree_depth, "start_index": start_index}, Gui.refresh_actors);
 };
 
-Api.add_actor = function (address, trust) {
-    Api.ec_request({"action": "add_actor", "address": address, "trust": trust}, Gui.refresh_cluster);
+Api.remove_actor = function (address) {
+    Api.ec_request({"action": "delete_actor", "address": address}, Gui.refresh_actors);
+};
+
+Api.set_trust = function (address, trust) {
+    Api.ec_request({"action": "set_trust", "address": address, "trust": trust}, Gui.refresh_cluster);
 };
 
 /* ***** API ***** */
@@ -281,7 +271,7 @@ Api.ajax = (path, data, success) => {
         data: Api.serialize_post_data(data),
         dataType: "json",
         success: success,
-        error: function (error) {
+        error: (error) => {
             Gui.handle_error(JSON.stringify(error));
         }
     });

@@ -1,7 +1,6 @@
 package org.iota.ec;
 
 import org.iota.ict.ec.AutonomousEconomicActor;
-import org.iota.ict.ec.ControlledEconomicActor;
 import org.iota.ict.ec.EconomicCluster;
 import org.iota.ict.ec.TrustedEconomicActor;
 import org.iota.ict.ixi.Ixi;
@@ -41,8 +40,8 @@ public class ECModule extends IxiModule {
         this.cluster = new EconomicCluster(ixi);
         this.api = new API(this);
         transfers.add("999999999999999999999999999999999999999999999999999999999999999999999999999999999");
-        addActorToCluster(Trytes.randomSequenceOfLength(81), 0.3);
-        addActorToCluster(Trytes.randomSequenceOfLength(81), 0.7);
+        setTrust(Trytes.randomSequenceOfLength(81), 0.3);
+        setTrust(Trytes.randomSequenceOfLength(81), 0.7);
     }
 
     /****** IXI ******/
@@ -89,10 +88,27 @@ public class ECModule extends IxiModule {
         autonomousActors.add(actor);
     }
 
-    void addActorToCluster(String address, double trust) {
-        TrustedEconomicActor trustedEconomicActor = new TrustedEconomicActor(address, trust);
-        cluster.addActor(trustedEconomicActor);
-        trustedActors.add(trustedEconomicActor);
+    void deleteAutonomousActor(String address) {
+        AutonomousEconomicActor actor = findAutonomousActor(address);
+        if(actor == null)
+            throw new IllegalArgumentException("You do not own an actor with address '"+address+"'.");
+        autonomousActors.remove(actor);
+    }
+
+    void setTrust(String address, double trust) {
+
+        TrustedEconomicActor actor;
+        if((actor = findTrustedActor(address)) != null) {
+            actor.setTrust(trust);
+            if(trust == 0) {
+                trustedActors.remove(actor);
+                // TODO cluster.removeActor(actor);
+            }
+        } else if(trust > 0) {
+            TrustedEconomicActor trustedEconomicActor = new TrustedEconomicActor(address, trust);
+            cluster.addActor(trustedEconomicActor);
+            trustedActors.add(trustedEconomicActor);
+        }
     }
 
     String sendTransfer(String seed, int index, String receiverAddress, String remainderAddress, BigInteger value, boolean checkBalances) {
@@ -151,7 +167,8 @@ public class ECModule extends IxiModule {
         InputBuilder inputBuilder = new InputBuilder(privateKey, BigInteger.ZERO.subtract(balance));
         Set<OutputBuilder> outputs = new HashSet<>();
         outputs.add(new OutputBuilder(receiverAddress, value, "EC9RECEIVER"));
-        outputs.add(new OutputBuilder(remainderAddress, balance.subtract(value), "EC9REMAINDER"));
+        if(!balance.equals(value))
+            outputs.add(new OutputBuilder(remainderAddress, balance.subtract(value), "EC9REMAINDER"));
         return new TransferBuilder(Collections.singleton(inputBuilder), outputs, TRANSFER_SECURITY);
     }
 

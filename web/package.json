@@ -8,6 +8,6 @@
   "license": "Apache-2.0",
   "dependencies": {
     "jquery": "latest",
-    "sweetalert": "latest"
+    "sweetalert2": "latest"
   }
 }

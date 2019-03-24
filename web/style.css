@@ -10,8 +10,8 @@ body {
     font-size: 0;
 }
 
-.toast {
-    font-size: 14px;
+.swal2-popup {
+    width: 40em !important;
 }
 
 header {
@@ -80,6 +80,13 @@ h2 {
     margin: 15px 0 30px 0;
 }
 
+code {
+    background-color: #EEE;
+    border-radius: 3px;
+    padding: 5px 10px;
+    letter-spacing: -0.05em;
+}
+
 input {
     background-color: #EEE;
     border: none;
@@ -92,11 +99,9 @@ input {
 }
 
 input.invalid {
-    background-color: #FF8888;
-    color: #FFF;
+    outline: 2px solid #FF8888;
 }
 
-input[type=submit],
 input[type=button] {
     background-color: #44B;
     color: #FFFFFF;

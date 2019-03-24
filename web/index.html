@@ -5,10 +5,8 @@
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport" />
     <link rel="stylesheet" type="text/css" href="style.css">
-    <link rel="stylesheet" type="text/css" href="node_modules/toastr/build/toastr.min.css" />
-    <script src="node_modules/sweetalert/dist/sweetalert.min.js"></script>
+    <script src="node_modules/sweetalert2/dist/sweetalert2.all.js"></script>
     <script src="node_modules/jquery/dist/jquery.min.js"></script>
-    <script src="node_modules/toastr/build/toastr.min.js"></script>
     <script src="main.js"></script>
 </head>
 <body>
@@ -17,30 +15,30 @@
         <p>Economic Clustering (EC) is the consensus mechanism in the Ict network. It allows you to come to consensus with others on the confirmation state of transactions.</p>
     </header>
     <div id="content">
-        <div class="section" id="wallet">
+        <form class="section" id="wallet">
             <h2>Wallet</h2>
-            <input type="text" placeholder="seed" id="seed">
+            <input type="text" placeholder="seed" id="seed" pattern="[A-Z9]{30,81}">
             <input type="button" value="load wallet" onclick="Gui.refresh_wallet()">
             <table></table>
-        </div>
+        </form>
         <div class="section" id="transfers">
             <h2>Transfers</h2>
             <table></table>
         </div>
-        <div class="section" id="cluster">
+        <form class="section" id="cluster">
             <h2>Cluster</h2>
-            <input type="text" placeholder="address" id="cluster_address">
-            <input type="number" placeholder="trust" id="cluster_trust" step="0.01" min="0">
-            <input type="button" value="add" onclick="Btn.add_actor();">
+            <input type="text" placeholder="address" id="cluster_address" pattern="[A-Z9]{30,81}">
+            <input type="number" placeholder="trust" id="cluster_trust" step="0.01" min="0" max="1000000">
+            <input type="button" value="add" onclick="Btn.set_trust();">
             <table>
             </table>
-        </div>
-        <div class="section" id="actors">
+        </form>
+        <form class="section" id="actors">
             <h2>Actors</h2>
-            <input type="number" placeholder="merkle tree depth" id="merkle_tree_depth" step="1" min="1" max="6">
+            <input type="number" placeholder="merkle tree depth" id="merkle_tree_depth" step="1" min="1" max="7" pattern="[1-7]">
             <input type="button" value="create" onclick="Btn.create_actor();">
             <table></table>
-        </div>
+        </form>
 
         <form class="dialog hidden" id="new_transfer">
             <h2>New Transfer</h2>
@@ -50,7 +48,7 @@
             <input type="text" placeholder="remainder address" id="transfers_remainder" pattern="[A-Z9]{81}" />
             <input type="text" placeholder="receiver address" id="transfers_receiver" pattern="[A-Z9]{81}" /><br/>
             <input type="number" placeholder="value" id="transfers_value" step="1" min="0" max="2800000000000000"/>
-            <input type="submit" value="submit" onclick="Btn.submit_transfer(); return false;">
+            <input type="button" value="submit" onclick="Btn.submit_transfer();">
             <input type="button" value="cancel" onclick="Gui.hide('new_transfer');">
         </form>
 

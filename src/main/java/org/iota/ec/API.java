@@ -57,10 +57,13 @@ class API {
             case "create_actor":
                 performActionCreateActor(requestJSON);
                 return success;
-            case "add_actor":
+            case "set_trust":
                 String address = requestJSON.getString("address");
                 double trust = requestJSON.getDouble("trust");
-                module.addActorToCluster(address, trust);
+                module.setTrust(address, trust);
+                return success;
+            case "delete_actor":
+                performActionDeleteActor(requestJSON);
                 return success;
             case "submit_transfer":
                 String hash = performActionSubmitTransfer(requestJSON);
@@ -130,6 +133,11 @@ class API {
         int merkleTreeDepth = requestJSON.getInt("merkle_tree_depth");
         int startIndex = requestJSON.getInt("start_index");
         module.createNewActor(seed, merkleTreeDepth, startIndex);
+    }
+
+    private void performActionDeleteActor(JSONObject requestJSON) {
+        String address = requestJSON.getString("address");
+        module.deleteAutonomousActor(address);
     }
 
     private JSONArray getClusterJSON() {
