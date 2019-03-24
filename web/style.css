@@ -87,6 +87,12 @@ code {
     letter-spacing: -0.05em;
 }
 
+code.hash {
+    font-size: 0.7em;
+    font-weight: bold;
+    letter-spacing: -0.1em;
+}
+
 input {
     background-color: #EEE;
     border: none;

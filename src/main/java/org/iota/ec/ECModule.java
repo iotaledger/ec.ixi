@@ -44,7 +44,6 @@ public class ECModule extends IxiModule {
         this.cluster = new EconomicCluster(ixi);
         this.api = new API(this);
 
-        transfers.add(Transaction.NULL_TRANSACTION.hash);
         createNewActor(Trytes.randomSequenceOfLength(81), 3, 0);
         AutonomousEconomicActor actor = autonomousActors.get(0);
         considerTangle(actor.getAddress(), Transaction.NULL_TRANSACTION.hash, Transaction.NULL_TRANSACTION.hash);
@@ -73,7 +72,6 @@ public class ECModule extends IxiModule {
     }
 
     private class ECContext extends SimpleIxiContext {
-
         public String respondToRequest(String request) {
             return api.processRequest(request);
         }
@@ -166,7 +164,8 @@ public class ECModule extends IxiModule {
     }
 
     Bundle getBundle(String bundleHead) {
-        return new Bundle(ixi.findTransactionByHash(bundleHead));
+        Transaction head = ixi.findTransactionByHash(bundleHead);
+        return head == null ? null : new Bundle(head);
     }
 
     /****** HELPERS ******/
@@ -227,9 +226,9 @@ public class ECModule extends IxiModule {
         Bundle bundle = bundleBuilder.build();
         for(Transaction transaction : bundle.getTransactions())
             ixi.submit(transaction);
-        String hash = bundle.getHead().hash;
-        transfers.add(hash);
-        return hash;
+        String bundleHead = bundle.getHead().hash;
+        watchTransfer(bundleHead);
+        return bundleHead;
     }
 
     public void changeInitialBalance(String address, BigInteger change) {
@@ -237,6 +236,14 @@ public class ECModule extends IxiModule {
         for(AutonomousEconomicActor actor : autonomousActors) {
             // TODO update actor
         }
+    }
+
+    public void watchTransfer(String bundleHead) {
+        transfers.add(bundleHead);
+    }
+
+    public void unwatchTransfer(String bundleHead) {
+        transfers.remove(bundleHead);
     }
 
     /****** GETTERS *****/

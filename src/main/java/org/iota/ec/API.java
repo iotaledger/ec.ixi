@@ -87,6 +87,8 @@ class API {
     private JSONArray getTransactionsJSON(String bundleHead) {
         JSONArray transactionsJSON = new JSONArray();
         Bundle bundle = module.getBundle(bundleHead);
+        if(bundle == null)
+            throw new RuntimeException("Could not find transaction " + bundleHead);
         for(Transaction transaction : bundle.getTransactions()) {
             JSONObject entry = new JSONObject();
             entry.put("hash", transaction.hash);

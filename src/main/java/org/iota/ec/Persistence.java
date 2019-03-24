@@ -10,8 +10,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.LinkedList;
-import java.util.List;
 
 public class Persistence {
 
@@ -44,12 +42,14 @@ public class Persistence {
         JSONObject persistenceJSON = new JSONObject();
         persistenceJSON.put("trusted", serializeTrustedActors());
         persistenceJSON.put("autonomous", serializeAutonomousActors());
+        persistenceJSON.put("transfers", serializeTransfers());
         write(persistence, persistenceJSON.toString());
     }
 
     public void load() throws IOException {
         JSONObject persistenceJSON = new JSONObject(read(persistence));
         deserializeTrustedActors(persistenceJSON.getJSONArray("trusted"));
+        deserializeTransfers(persistenceJSON.getJSONArray("transfers"));
     }
 
     private JSONArray serializeTrustedActors() {
@@ -79,6 +79,16 @@ public class Persistence {
             String address = entry.getString("address");
             double trust = entry.getDouble("trust");
             module.setTrust(address, trust);
+        }
+    }
+
+    private JSONArray serializeTransfers() {
+        return new JSONArray(module.getTransfers());
+    }
+
+    private void deserializeTransfers(JSONArray serialized) {
+        for(int i = 0; i < serialized.length(); i++) {
+            module.watchTransfer(serialized.getString(i));
         }
     }
 
