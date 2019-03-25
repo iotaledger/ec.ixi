@@ -153,3 +153,21 @@ table td input[type=button] {
     width: auto;
     margin: 0 5px;
 }
+
+/***** D3 *****/
+
+#tangle svg .links line {
+    stroke: #999;
+    stroke-opacity: 0.6;
+}
+
+#tangle svg .nodes circle {
+    stroke: #fff;
+    stroke-width: 1.5px;
+}
+
+#tangle svg text {
+    font-family: monospace;
+    font-size: 12px;
+    font-weight: bold;
+}

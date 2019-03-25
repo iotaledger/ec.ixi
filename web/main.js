@@ -6,6 +6,7 @@ const Gui = {};
 const Gen = {};
 const Api = {};
 const Btn = {};
+const Graph = {};
 
 window.onload = function () {
     init_elements();
@@ -14,6 +15,8 @@ window.onload = function () {
     Gui.refresh_actors();
     Gui.refresh_cluster();
     Gui.refresh_transfers();
+
+    init_graph();
 };
 
 function init_elements() {
@@ -77,7 +80,9 @@ function init_functions() {
         shorten(entry['hash']),
         shorten(entry['address']),
         entry['value'],
-        $("<div>").text(entry['confidence']).append(Gen.gen_cell_button("details", () => { Gui.display_confidences(entry['confidences']); Gui.show("confidences"); }))
+        $("<div>").text(entry['confidence'])
+            .append(Gen.gen_cell_button("visualize", () => { Api.get_tangle(entry['hash'], Gui.show_tangle) }))
+            .append(Gen.gen_cell_button("details", () => { Gui.display_confidences(entry['confidences']); Gui.show("confidences"); }))
     ];
 
     const confidences_serialize = entry => [
@@ -193,6 +198,19 @@ Gui.handle_error = function (message) {
 Gui.hide = (id) => { $('#'+id).addClass("hidden"); };
 Gui.show = (id) => { $('#'+id).removeClass("hidden"); };
 
+Gui.show_tangle = function (tangle) {
+    Gui.show("tangle");
+    $.each(tangle['nodes'], (index, node) => {
+        node['id'] = node['id'].substr(0, 10)+"…";
+    });
+    $.each(tangle['links'], (index, link) => {
+        link['source'] = link['source'].substr(0, 10)+"…";
+        link['target'] = link['target'].substr(0, 10)+"…";
+        link['distance'] = 100;
+    });
+    Graph.load_graph(tangle);
+}
+
 Gui.validate_form = (id) => {
     const $form_inputs = $('#'+id+" input");
     for(let i = 0; i < $form_inputs.length; i++) {
@@ -286,6 +304,10 @@ Api.get_markers = function (actor, callback) {
     Api.ec_request({"action": "get_markers", "actor": actor}, response => callback(response['markers']));
 };
 
+Api.get_tangle = function (transaction, callback) {
+    Api.ec_request({"action": "get_tangle", "transaction": transaction}, response => callback(response['tangle']));
+};
+
 Api.create_actor = function (seed, merkle_tree_depth, start_index) {
     Api.ec_request({"action": "create_actor", "seed": seed, "depth": merkle_tree_depth, "index": start_index, "security_level": 3}, Gui.refresh_actors);
 };
@@ -309,7 +331,7 @@ Api.change_balance = function (address, to_add) {
 /* ***** API ***** */
 
 Api.ec_request = (request, success) => {
-    Api.ajax("getModuleResponse", {"request": JSON.stringify(request), "path": "ec.ixi-1.0.jar"}, data => {
+    Api.ajax("getModuleResponse", {"request": JSON.stringify(request), "path": "virtual/EC.ixi"}, data => {
         const response = JSON.parse(data['response']);
         response['success'] ? (success ? success(response) : {}) : Gui.handle_error("api error: " + response['error'].replace(/[A-Z9]{81}/g, "<code class='hash'>$&</code>"));
     });
@@ -336,3 +358,68 @@ Api.serialize_post_data = (data) => {
     });
     return serialized;
 };
+
+// ***** D3 *****
+
+    Graph.load_graph = function(graph) {
+
+        $("#tangle svg").html("");
+
+        const svg = d3.select("svg"),
+            width = +svg.attr("width"),
+            height = +svg.attr("height");
+
+        const color = d3.scaleOrdinal(d3.schemeCategory20);
+
+        const simulation = d3.forceSimulation()
+            .force("link", d3.forceLink().distance(function(d) {return d.distance;}).id(function(d) { return d.id; }))
+            .force("charge", d3.forceManyBody())
+            .force("center", d3.forceCenter(width / 2, height / 2));
+
+        const link = svg.append("g")
+            .attr("class", "links")
+            .selectAll("line")
+            .data(graph.links)
+            .enter().append("line")
+            .attr("stroke-width", function(d) { return Math.sqrt(d.value); });
+
+        const node = svg.append("g")
+            .attr("class", "nodes")
+            .selectAll("g")
+            .data(graph.nodes)
+            .enter().append("g")
+
+        const circles = node.append("circle")
+            .attr("r", 10)
+            .attr("fill", function(d) { return color(d.group); });
+
+        const lables = node.append("text")
+            .text(function(d) {
+                return d.id;
+            })
+            .attr('x', 10)
+            .attr('y', 10);
+
+        node.append("title")
+            .text(function(d) { return d.id; });
+
+        simulation
+            .nodes(graph.nodes)
+            .on("tick", ticked);
+
+        simulation.force("link")
+            .links(graph.links);
+
+        function ticked() {
+            link
+                .attr("x1", function(d) { return d.source.x; })
+                .attr("y1", function(d) { return d.source.y; })
+                .attr("x2", function(d) { return d.target.x; })
+                .attr("y2", function(d) { return d.target.y; });
+
+            node
+                .attr("transform", function(d) {
+                    return "translate(" + d.x + "," + d.y + ")";
+                })
+        }
+    };

@@ -234,6 +234,10 @@ public class ECModule extends IxiModule {
 
     /****** GETTERS *****/
 
+    Ixi getIxi() {
+        return ixi;
+    }
+
     List<TrustedEconomicActor> getTrustedActors() {
         return cluster.getActors();
     }

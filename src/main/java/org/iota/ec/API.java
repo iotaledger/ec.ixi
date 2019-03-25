@@ -9,7 +9,10 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.math.BigInteger;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 class API {
 
@@ -57,6 +60,9 @@ class API {
                 String actor = requestJSON.getString("actor");
                 JSONArray markersJSON = module.getMarkers(actor);
                 return success.put("markers", markersJSON);
+            case "get_tangle":
+                String transaction = requestJSON.getString("transaction");
+                return success.put("tangle", getTangle(transaction));
             /* ***** DO ***** */
             case "create_actor":
                 module.createNewActor(SerializableAutoIndexableMerkleTree.fromJSON(requestJSON));
@@ -108,6 +114,28 @@ class API {
             transactionsJSON.put(entry);
         }
         return transactionsJSON;
+    }
+
+    private JSONObject getTangle(String hash) {
+        JSONArray nodes = new JSONArray();
+        JSONArray links = new JSONArray();
+
+        Set<String> traversed = new HashSet<>();
+        LinkedList<Transaction> transactions = new LinkedList<>();
+        transactions.add(module.getIxi().findTransactionByHash(hash));
+
+        while (transactions.size() > 0) {
+            Transaction transaction = transactions.poll();
+            if(transaction != null && traversed.add(transaction.hash)) {
+                if(transaction.getTrunk() != null) transactions.add(transaction.getTrunk());
+                if(transaction.getBranch() != null) transactions.add(transaction.getBranch());
+                nodes.put(new JSONObject().put("id", transaction.hash));
+                links.put(new JSONObject().put("source", transaction.hash).put("target", transaction.branchHash()));
+                links.put(new JSONObject().put("source", transaction.hash).put("target", transaction.trunkHash()));
+            }
+        }
+
+        return new JSONObject().put("nodes", nodes).put("links", links);
     }
 
     private JSONArray getConfidenceByEachActor(String hash) {

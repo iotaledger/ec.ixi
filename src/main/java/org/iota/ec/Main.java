@@ -7,7 +7,10 @@ public class Main {
 
     public static void main(String[] args) {
         Ict ict = new Ict(new Properties().toFinal());
-        ict.getModuleHolder().initAllModules();
-        ict.getModuleHolder().startAllModules();
+        try {
+            ict.getModuleHolder().loadVirtualModule(ECModule.class, "EC.ixi");
+        } catch (Throwable t) {
+            t.printStackTrace();
+        }
     }
 }

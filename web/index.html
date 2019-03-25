@@ -7,6 +7,7 @@
     <link rel="stylesheet" type="text/css" href="style.css">
     <script src="node_modules/sweetalert2/dist/sweetalert2.all.js"></script>
     <script src="node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
     <script src="main.js"></script>
 </head>
 <body>
@@ -87,5 +88,12 @@
             <input type="button" value="close" onclick="Gui.hide('issue');">
         </form>
     </div>
+
+    <div class="dialog hidden" id="tangle">
+        <h2>Visualizer</h2>
+        <svg width="960" height="600"></svg>
+        <input type="button" value="close" onclick="Gui.hide('tangle');">
+    </div>
+
 </body>
 </html>
