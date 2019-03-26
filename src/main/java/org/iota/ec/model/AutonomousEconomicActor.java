@@ -60,9 +60,13 @@ public class AutonomousEconomicActor extends ControlledEconomicActor {
     }
 
     protected void removeInvalidTangles(List<String> tangles) {
-        for(int i = 0; i < tangles.size(); i++)
-            if(!isTangleValid(tangles.get(i)))
+        for(int i = 0; i < tangles.size(); i++) {
+            String tangle = tangles.get(i);
+            if(tangle.length() != Transaction.Field.BRANCH_HASH.tryteLength + Transaction.Field.TRUNK_HASH.tryteLength)
+                throw new IllegalArgumentException("Not a tangle, nvalid length: " + tangle);
+            if(!isTangleValid(tangle))
                 tangles.remove(i--);
+        }
     }
 
     public boolean isTangleValid(String tangle) {
@@ -94,6 +98,7 @@ public class AutonomousEconomicActor extends ControlledEconomicActor {
         double confidenceRef1 = economicCluster.determineApprovalConfidence(ref1);
         double confidenceRef2 = economicCluster.determineApprovalConfidence(ref2);
         return (mostConfident != null && mostConfident.getKey().equals(tangle) ? 1+aggressivity : 1) * Math.min(confidenceRef1, confidenceRef2);
+        // TODO improve
     }
 
     protected Set<ConfidenceCalculator.Conflict> findAllConflicts(List<String> tangles) {

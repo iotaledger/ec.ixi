@@ -22,10 +22,12 @@
             <input type="button" value="load wallet" onclick="Gui.refresh_wallet()">
             <table></table>
         </form>
+
         <div class="section" id="transfers">
             <h2>Transfers</h2>
             <table></table>
         </div>
+
         <div class="section" id="cluster">
             <h2>Cluster</h2>
             <form id="change_balance">
@@ -38,9 +40,9 @@
                 <input type="number" placeholder="trust" id="cluster_trust" step="0.01" min="0" max="1000000">
                 <input type="button" value="add" onclick="Btn.set_trust();">
             </form>
-            <table>
-            </table>
+            <table></table>
         </div>
+
         <form class="section" id="actors">
             <h2>Actors</h2>
             <input type="number" placeholder="merkle tree depth" id="merkle_tree_depth" step="1" min="1" max="7" pattern="[1-7]">
@@ -87,13 +89,12 @@
             <input type="button" value="issue" onclick="Btn.issue_marker('issue');">
             <input type="button" value="close" onclick="Gui.hide('issue');">
         </form>
-    </div>
 
-    <div class="dialog hidden" id="tangle">
-        <h2>Visualizer</h2>
-        <svg width="960" height="600"></svg>
-        <input type="button" value="close" onclick="Gui.hide('tangle');">
+        <div class="dialog hidden" id="tangle">
+            <h2>Visualizer</h2>
+            <svg width="960" height="600"></svg>
+            <input type="button" value="close" onclick="Gui.hide('tangle');">
+        </div>
     </div>
-
 </body>
 </html>

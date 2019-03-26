@@ -77,10 +77,6 @@ public class ECModule extends IxiModule {
         if(actor == null)
             throw new IllegalArgumentException("None of the actors controlled by you has the address '"+actorAddress+"'");
         actor.tick(Collections.singleton(trunk+branch));
-        // TODO validate Tangle
-        Bundle bundle = actor.buildMarker(trunk, branch, 0.05); // TODO initial confidence
-        for(Transaction transaction : bundle.getTransactions())
-            ixi.submit(transaction);
     }
 
     double getConfidence(String hash) {

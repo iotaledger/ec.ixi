@@ -87,9 +87,6 @@ public class AutonomousEconomicActorTest extends IctTestTemplate {
         assertConfidence(cluster, transfer1, 0);
         assertConfidence(cluster, transfer2, 0);
 
-        Assert.assertEquals(0, cluster.determineApprovalConfidence(transfer1), 1E-2);
-        Assert.assertEquals(0, cluster.determineApprovalConfidence(transfer2), 1E-2);
-
         submitBundle(ict, auto2.buildMarker(transfer1, transfer1, 0.5));
         submitBundle(ict, auto3.buildMarker(transfer2, transfer2, 0.5));
         saveSleep(50);
@@ -110,6 +107,43 @@ public class AutonomousEconomicActorTest extends IctTestTemplate {
 
         assertConfidence(cluster, transfer1, 1);
         assertConfidence(cluster, transfer2, 0);
+    }
+
+    @Test
+    public void testConvergence2() {
+
+        Ict ict = createIct();
+        EconomicCluster cluster = new EconomicCluster(ict);
+
+        SignatureSchemeImplementation.PrivateKey key = SignatureSchemeImplementation.derivePrivateKeyFromSeed(Trytes.randomSequenceOfLength(81), 0, 1);
+        BigInteger value = BigInteger.valueOf(10);
+
+        Map<String, BigInteger> initialBalances = new HashMap<>();
+        initialBalances.put(key.deriveAddress(), value);
+
+        AutonomousEconomicActor auto1 = new AutonomousEconomicActor(ict, cluster, initialBalances, randomMerkleTree(5));
+        AutonomousEconomicActor auto2 = new AutonomousEconomicActor(ict, cluster, initialBalances, randomMerkleTree(5));
+
+        cluster.addActor(new TrustedEconomicActor(auto1.getAddress(), 0.4));
+        cluster.addActor(new TrustedEconomicActor(auto2.getAddress(), 0.6));
+
+        String transfer1 = submitBundle(ict, buildValidTransfer(key, value, Trytes.randomSequenceOfLength(81), Collections.<String>emptySet()));
+
+        assertConfidence(cluster, transfer1, 0);
+
+        auto1.tick(Collections.singleton(transfer1+transfer1));
+        saveSleep(50);
+
+        auto1.setAggressivity(2);
+        auto2.setAggressivity(2);
+
+        for(int iteration = 0; iteration < 2; iteration++) {
+            auto1.tick();
+            auto2.tick();
+            saveSleep(100);
+        }
+
+        assertConfidence(cluster, transfer1, 1);
     }
 
     private static void assertConfidence(EconomicCluster cluster, String transaction, double expected) {

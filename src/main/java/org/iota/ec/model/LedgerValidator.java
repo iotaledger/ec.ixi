@@ -163,7 +163,13 @@ public class LedgerValidator {
 
         IncompleteTangleException(String unavailableTransactionHash) {
             super(unavailableTransactionHash);
+            assert unavailableTransactionHash.length() == Transaction.Field.TRUNK_HASH.tryteLength;
             this.unavailableTransactionHash = unavailableTransactionHash;
+        }
+
+        @Override
+        public String toString() {
+            return "Missing transaction: '"+unavailableTransactionHash+"'";
         }
     }
 

@@ -129,7 +129,7 @@ class API {
             if(transaction != null && traversed.add(transaction.hash)) {
                 if(transaction.getTrunk() != null) transactions.add(transaction.getTrunk());
                 if(transaction.getBranch() != null) transactions.add(transaction.getBranch());
-                nodes.put(new JSONObject().put("id", transaction.hash));
+                nodes.put(new JSONObject().put("id", transaction.hash).put("value", transaction.value.toString()));
                 links.put(new JSONObject().put("source", transaction.hash).put("target", transaction.branchHash()));
                 links.put(new JSONObject().put("source", transaction.hash).put("target", transaction.trunkHash()));
             }

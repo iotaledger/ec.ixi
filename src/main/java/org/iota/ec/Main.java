@@ -12,5 +12,6 @@ public class Main {
         } catch (Throwable t) {
             t.printStackTrace();
         }
+        ict.getModuleHolder().startAllModules();
     }
 }

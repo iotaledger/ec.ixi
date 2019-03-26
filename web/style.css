@@ -52,7 +52,7 @@ header p {
     max-height: 500px;
     min-width: 500px;
     overflow-y: auto;
-    border-radius: 3px;
+    border-radius: 10px;
     margin: 20px;
     padding: 20px 30px;
     vertical-align: top;

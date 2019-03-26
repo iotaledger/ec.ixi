@@ -202,6 +202,8 @@ Gui.show_tangle = function (tangle) {
     Gui.show("tangle");
     $.each(tangle['nodes'], (index, node) => {
         node['id'] = node['id'].substr(0, 10)+"…";
+        const value = parseInt(node['value']);
+        node['group'] = value < 0 ? 1 : value > 0 ? 3 : 2;
     });
     $.each(tangle['links'], (index, link) => {
         link['source'] = link['source'].substr(0, 10)+"…";
@@ -369,7 +371,12 @@ Api.serialize_post_data = (data) => {
             width = +svg.attr("width"),
             height = +svg.attr("height");
 
-        const color = d3.scaleOrdinal(d3.schemeCategory20);
+        const color = [
+            "#DDDDDD",
+            "#FF0044", // output
+            "#BBBBBB", // zero value
+            "#00BB88" // input
+        ];
 
         const simulation = d3.forceSimulation()
             .force("link", d3.forceLink().distance(function(d) {return d.distance;}).id(function(d) { return d.id; }))
@@ -387,11 +394,11 @@ Api.serialize_post_data = (data) => {
             .attr("class", "nodes")
             .selectAll("g")
             .data(graph.nodes)
-            .enter().append("g")
+            .enter().append("g");
 
         const circles = node.append("circle")
             .attr("r", 10)
-            .attr("fill", function(d) { return color(d.group); });
+            .attr("fill", function(d) { return color[d.group]; });
 
         const lables = node.append("text")
             .text(function(d) {
@@ -401,7 +408,7 @@ Api.serialize_post_data = (data) => {
             .attr('y', 10);
 
         node.append("title")
-            .text(function(d) { return d.id; });
+            .text(function(d) { return d.id + ""; });
 
         simulation
             .nodes(graph.nodes)
