@@ -178,12 +178,12 @@ public class ECModule extends IxiModule {
     private TransferBuilder buildTransfer(SignatureSchemeImplementation.PrivateKey privateKey, BigInteger balance, String receiverAddress, String remainderAddress, BigInteger value, Set<String> references, boolean checkBalances) {
         if(balance.compareTo(value) < 0 && checkBalances)
             throw new IllegalArgumentException("insufficient balance (balance="+balance+" < value="+value+")");
-        InputBuilder inputBuilder = new InputBuilder(privateKey, BigInteger.ZERO.subtract(balance));
+        Set<InputBuilder> inputs = value.equals(BigInteger.ZERO) ? Collections.emptySet() : Collections.singleton( new InputBuilder(privateKey, BigInteger.ZERO.subtract(balance)));
         Set<OutputBuilder> outputs = new HashSet<>();
         outputs.add(new OutputBuilder(receiverAddress, value, "EC9RECEIVER"));
         if(!balance.equals(value))
             outputs.add(new OutputBuilder(remainderAddress, balance.subtract(value), "EC9REMAINDER"));
-        return new TransferBuilder(Collections.singleton(inputBuilder), outputs, TRANSFER_SECURITY);
+        return new TransferBuilder(inputs, outputs, TRANSFER_SECURITY);
     }
 
     private Set<String> findTips(int amount) {

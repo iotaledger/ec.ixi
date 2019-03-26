@@ -188,10 +188,14 @@ class API {
 
     private JSONArray getClusterJSON() {
         JSONArray clusterJSON = new JSONArray();
+        double trustSum = 0;
+        for(TrustedEconomicActor actor : module.getTrustedActors())
+            trustSum += actor.getTrust();
         for(TrustedEconomicActor actor : module.getTrustedActors()) {
             JSONObject jsonEntry = new JSONObject();
             jsonEntry.put("address", actor.getAddress());
-            jsonEntry.put("trust", actor.getTrust());
+            jsonEntry.put("trust_abs", actor.getTrust());
+            jsonEntry.put("trust_rel", actor.getTrust()/trustSum);
             clusterJSON.put(jsonEntry);
         }
         return clusterJSON;

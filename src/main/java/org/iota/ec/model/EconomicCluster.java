@@ -11,12 +11,13 @@ import org.iota.ict.utils.Constants;
 
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 public class EconomicCluster implements GossipListener {
 
     private final Ixi ixi;
-    private Set<TrustedEconomicActor> actors = new HashSet<>();
+    private List<TrustedEconomicActor> actors = new LinkedList<>();
     private final ECGossipFilter filter = new ECGossipFilter();
 
     public EconomicCluster(Ixi ixi) {

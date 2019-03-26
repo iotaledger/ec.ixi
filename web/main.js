@@ -15,8 +15,6 @@ window.onload = function () {
     Gui.refresh_actors();
     Gui.refresh_cluster();
     Gui.refresh_transfers();
-
-    init_graph();
 };
 
 function init_elements() {
@@ -37,6 +35,8 @@ function init_functions() {
 
     const shorten = (hash) => $("<div>").text(hash.substr(0, 30) + "…")
         .append(Gen.gen_cell_button("copy", () => {copy_to_clipboard(hash)}));
+
+    const percentage = (number) => parseFloat(number * 100).toFixed(1) + "%";
 
     const prepare_transfer = (seed, index, address, balance) => {
         val("transfers_seed", seed);
@@ -65,7 +65,7 @@ function init_functions() {
 
     const cluster_serialize = entry => [
         shorten(entry['address']),
-        entry['trust'],
+        entry['trust_abs'] + " ("+percentage(entry['trust_rel'])+")",
         $("<div>").append(Gen.gen_cell_button("markers", () => { Gui.refresh_markers(entry['address']); Gui.show("markers"); }))
             .append(Gen.gen_cell_button("✘", () => {Api.set_trust(entry['address'], 0)}))
     ];
@@ -80,20 +80,20 @@ function init_functions() {
         shorten(entry['hash']),
         shorten(entry['address']),
         entry['value'],
-        $("<div>").text(entry['confidence'])
+        $("<div>").text(percentage(entry['confidence']))
             .append(Gen.gen_cell_button("visualize", () => { Api.get_tangle(entry['hash'], Gui.show_tangle) }))
             .append(Gen.gen_cell_button("details", () => { Gui.display_confidences(entry['confidences']); Gui.show("confidences"); }))
     ];
 
     const confidences_serialize = entry => [
         shorten(entry['actor']),
-        entry['confidence']
+        percentage(entry['confidence'])
     ];
 
     const markers_serialize = entry => [
         shorten(entry['ref1']),
         shorten(entry['ref2']),
-        entry['confidence']
+        percentage(entry['confidence'])
     ];
 
     Gui.display_balances = Gen.gen_display_function('wallet', ["index", "address", "balance", ""], wallet_serialize);

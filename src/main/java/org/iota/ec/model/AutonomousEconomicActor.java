@@ -115,13 +115,15 @@ public class AutonomousEconomicActor extends ControlledEconomicActor {
     }
 
     protected void adjustConfidence(String tangle, double newConfidence) {
-        System.err.println("adjusting confidence for " + tangle + " to " + newConfidence);
-        boolean shouldIssueNewMarker = !publishedConfidenceByMarkedTangle.containsKey(tangle) || shouldIssueMarkerToUpdateConfidence(publishedConfidenceByMarkedTangle.get(tangle), newConfidence);
+        System.err.println("adjusting confidence for " + tangle + " towards " + newConfidence);
+        double oldConfidence = publishedConfidenceByMarkedTangle.getOrDefault(tangle, new Double(0));
+        boolean shouldIssueNewMarker = !publishedConfidenceByMarkedTangle.containsKey(tangle) || shouldIssueMarkerToUpdateConfidence(oldConfidence, newConfidence);
         if(shouldIssueNewMarker) {
-            publishedConfidenceByMarkedTangle.put(tangle, newConfidence);
+            double conservativeConfidence = oldConfidence + (newConfidence - oldConfidence) / 20.0;
+            publishedConfidenceByMarkedTangle.put(tangle, conservativeConfidence);
             String trunk = tangle.substring(0, 81);
             String branch = tangle.substring(81);
-            Bundle marker = buildMarker(trunk, branch, newConfidence);
+            Bundle marker = buildMarker(trunk, branch, conservativeConfidence);
             for (Transaction t : marker.getTransactions())
                 ixi.submit(t);
         }
