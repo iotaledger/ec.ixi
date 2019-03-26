@@ -15,7 +15,7 @@
 <body>
     <header>
         <h1>EC.ixi <label id="sub_headline">Economic Clustering</label></h1>
-        <p>Economic Clustering (EC) is the consensus mechanism in the Ict network. It allows you to come to consensus with others on the confirmation state of transactions.</p>
+        <p>Economic Clustering (<a href="https://github.com/iotaledger/ec.ixi" target="_blank">repository</a>) is the consensus mechanism in the Ict network. It allows you to come to consensus with others on the confirmation state of transactions.</p>
     </header>
     <div id="content">
         <form class="section" id="wallet">
@@ -71,7 +71,10 @@
             <div class="checkbox_info"><input type="checkbox" id="transfers_check_balances"> check for sufficient balance</div>
             <input type="number" placeholder="value" id="transfers_value" step="1" min="0" max="2800000000000000"/>
             <input type="button" value="submit" onclick="Btn.submit_transfer();">
-            <input type="button" value="cancel" onclick="Gui.hide('new_transfer');">
+            <input type="button" value="cancel" onclick="Gui.hide('new_transfer');"><br/>
+            <hr/>
+            <input type="text" placeholder="tip #1 (optional)" id="transfer_tip1" pattern="^([A-Z9]{81})?$">
+            <input type="text" placeholder="tip #2 (optional)" id="transfer_tip2" pattern="^([A-Z9]{81})?$">
         </form>
 
         <div class="dialog hidden" id="transactions">

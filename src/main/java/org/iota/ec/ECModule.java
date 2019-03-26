@@ -11,6 +11,7 @@ import org.iota.ict.ixi.context.SimpleIxiContext;
 import org.iota.ict.model.bundle.Bundle;
 import org.iota.ict.model.bundle.BundleBuilder;
 import org.iota.ict.model.transaction.Transaction;
+import org.iota.ict.model.transaction.TransactionBuilder;
 import org.iota.ict.model.transfer.InputBuilder;
 import org.iota.ict.model.transfer.OutputBuilder;
 import org.iota.ict.model.transfer.TransferBuilder;
@@ -125,12 +126,11 @@ public class ECModule extends IxiModule {
         }
     }
 
-    String sendTransfer(String seed, int index, String receiverAddress, String remainderAddress, BigInteger value, boolean checkBalances) {
+    String sendTransfer(String seed, int index, String receiverAddress, String remainderAddress, BigInteger value, boolean checkBalances, Collection<String> tips) {
         SignatureSchemeImplementation.PrivateKey privateKey = SignatureSchemeImplementation.derivePrivateKeyFromSeed(seed, index, TRANSFER_SECURITY);
         BigInteger balance = getBalanceOfAddress(privateKey.deriveAddress());
-        Set<String> tips = findTips(TIPS_PER_TRANSFER);
-        TransferBuilder transferBuilder = buildTransfer(privateKey, balance, receiverAddress, remainderAddress, value, tips, checkBalances);
-        return submitTransfer(transferBuilder);
+        TransferBuilder transferBuilder = buildTransfer(privateKey, balance, receiverAddress, remainderAddress, value, checkBalances, tips.size());
+        return submitTransfer(transferBuilder, tips);
     }
 
     BigInteger getBalanceOfAddress(String address) {
@@ -176,7 +176,7 @@ public class ECModule extends IxiModule {
         return addresses;
     }
 
-    private TransferBuilder buildTransfer(SignatureSchemeImplementation.PrivateKey privateKey, BigInteger balance, String receiverAddress, String remainderAddress, BigInteger value, Set<String> references, boolean checkBalances) {
+    private TransferBuilder buildTransfer(SignatureSchemeImplementation.PrivateKey privateKey, BigInteger balance, String receiverAddress, String remainderAddress, BigInteger value, boolean checkBalances, int amountOfTips) {
         if(balance.compareTo(value) < 0) {
             if(checkBalances)
                 throw new IllegalArgumentException("insufficient balance (balance="+balance+" < value="+value+")");
@@ -188,6 +188,10 @@ public class ECModule extends IxiModule {
         outputs.add(new OutputBuilder(receiverAddress, value, "EC9RECEIVER"));
         if(!balance.equals(value))
             outputs.add(new OutputBuilder(remainderAddress, balance.subtract(value), "EC9REMAINDER"));
+
+        while ((amountOfTips+1)/2 > inputs.size() * TRANSFER_SECURITY + outputs.size())
+            outputs.add(new OutputBuilder(Trytes.NULL_HASH, BigInteger.ZERO, "JUST9HERE9FOR9THE9TIPS"));
+
         return new TransferBuilder(inputs, outputs, TRANSFER_SECURITY);
     }
 
@@ -208,8 +212,19 @@ public class ECModule extends IxiModule {
      * @param transferBuilder Modeled transfer to submit.
      * @return Hash of bundle head of submitted bundle.
      * */
-    private String submitTransfer(TransferBuilder transferBuilder) {
+    private String submitTransfer(TransferBuilder transferBuilder, Collection<String> tips) {
         BundleBuilder bundleBuilder = transferBuilder.build();
+
+        int tipNr = 0;
+        for(String tip : tips) {
+            TransactionBuilder transactionBuilder = bundleBuilder.getTailToHead().get(tipNr/2);
+            if(tipNr%2 == 0)
+                transactionBuilder.branchHash = tip;
+            else
+                transactionBuilder.trunkHash = tip;
+            tipNr++;
+        }
+
         Bundle bundle = bundleBuilder.build();
         for(Transaction transaction : bundle.getTransactions())
             ixi.submit(transaction);

@@ -22,7 +22,6 @@ function trytes_to_hex(trytes) {
     let hex = "";
     for(let i = 0; i < trytes.length; i++)
         hex += HEX[(trytes[i] === '9' ? 0 : (trytes.charCodeAt(i)-'A'.charCodeAt(0))+1)%16];
-    console.log(hex);
     return hex;
 }
 
@@ -131,7 +130,12 @@ Btn.submit_transfer = () => {
     const remainder = val("transfers_remainder");
     const value = val("transfers_value");
     const check_balances = $inputs['transfers_check_balances'].is(":checked");
-    Api.submit_transfer(seed, index, receiver, remainder, value, check_balances, () => { Gui.refresh_transfers(); Gui.hide("new_transfer") });
+    const tips = [];
+    const tip1 = val("transfer_tip1");
+    const tip2 = val("transfer_tip2");
+    if(tip1.length > 0) tips.push(tip1);
+    if(tip2.length > 0) tips.push(tip2);
+    Api.submit_transfer(seed, index, receiver, remainder, value, check_balances, tips,() => { Gui.refresh_transfers(); Gui.hide("new_transfer") });
 };
 
 Btn.issue_marker = () => {
@@ -222,7 +226,7 @@ Gui.show_tangle = function (tangle) {
     $.each(tangle['nodes'], (index, node) => {
         node['id'] = node['id'].substr(0, 10)+"…";
         const value = parseInt(node['value']);
-        node['group'] = value < 0 ? 1 : value > 0 ? 3 : 2;
+        node['group'] = isNaN(value) ? 0 : value < 0 ? 1 : value > 0 ? 3 : 2;
     });
     $.each(tangle['links'], (index, link) => {
         link['source'] = link['source'].substr(0, 10)+"…";
@@ -278,7 +282,7 @@ Gen.gen_cell_button = (name, onclick) => $("<input>").attr("type", "button").val
 
 /* ***** API WRAPPERS ***** */
 
-Api.submit_transfer = function (seed, index, receiver, remainder, value, check_balances, callback) {
+Api.submit_transfer = function (seed, index, receiver, remainder, value, check_balances, tips, callback) {
     const request ={
         "action": "submit_transfer",
         "seed": seed,
@@ -286,6 +290,7 @@ Api.submit_transfer = function (seed, index, receiver, remainder, value, check_b
         "receiver": receiver,
         "remainder": remainder,
         "value": value,
+        "tips": tips,
         "check_balances": check_balances
     };
     Api.ec_request(request, response => callback(response['hash']));

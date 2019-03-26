@@ -122,20 +122,32 @@ class API {
 
         Set<String> traversed = new HashSet<>();
         LinkedList<Transaction> transactions = new LinkedList<>();
-        transactions.add(module.getIxi().findTransactionByHash(hash));
+
+        addNode(traversed, transactions, nodes, links, module.getIxi().findTransactionByHash(hash), hash);
 
         while (transactions.size() > 0) {
             Transaction transaction = transactions.poll();
-            if(transaction != null && traversed.add(transaction.hash)) {
-                if(transaction.getTrunk() != null) transactions.add(transaction.getTrunk());
-                if(transaction.getBranch() != null) transactions.add(transaction.getBranch());
-                nodes.put(new JSONObject().put("id", transaction.hash).put("value", transaction.value.toString()));
-                links.put(new JSONObject().put("source", transaction.hash).put("target", transaction.branchHash()));
-                links.put(new JSONObject().put("source", transaction.hash).put("target", transaction.trunkHash()));
-            }
+            addNode(traversed, transactions, nodes, links, transaction.getBranch(), transaction.branchHash());
+            addNode(traversed, transactions, nodes, links, transaction.getTrunk(), transaction.trunkHash());
         }
 
         return new JSONObject().put("nodes", nodes).put("links", links);
+    }
+
+    private void addNode(Set<String> traversed, LinkedList<Transaction> toTraverse, JSONArray nodes, JSONArray links, Transaction transactionOrNull, String hash) {
+        if(!traversed.add(hash))
+            return;
+
+        JSONObject entry = new JSONObject().put("id", hash);
+        if(transactionOrNull != null)
+            entry.put("value", transactionOrNull.value.toString());
+        nodes.put(entry);
+
+        if(transactionOrNull != null) {
+            links.put(new JSONObject().put("source", hash).put("target", transactionOrNull.branchHash()));
+            links.put(new JSONObject().put("source", hash).put("target", transactionOrNull.trunkHash()));
+            toTraverse.add(transactionOrNull);
+        }
     }
 
     private JSONArray getConfidenceByEachActor(String hash) {
@@ -178,7 +190,15 @@ class API {
         String remainderAddress = requestJSON.getString("remainder");
         BigInteger value = new BigInteger(requestJSON.getString("value"));
         boolean checkBalances = requestJSON.getBoolean("check_balances");
-        return module.sendTransfer(seed, index, receiverAddress, remainderAddress, value, checkBalances);
+        List<String> tips = toStringList(requestJSON.getJSONArray("tips"));
+        return module.sendTransfer(seed, index, receiverAddress, remainderAddress, value, checkBalances, tips);
+    }
+
+    private static List<String> toStringList(JSONArray jsonArray) {
+        List<String> list = new LinkedList<>();
+        for(int i = 0; i < jsonArray.length(); i++)
+            list.add(jsonArray.getString(i));
+        return list;
     }
 
     private void performActionDeleteActor(JSONObject requestJSON) {
