@@ -25,11 +25,23 @@ public class EconomicCluster implements GossipListener {
         ixi.addListener(this);
     }
 
-    public void addActor(TrustedEconomicActor actor) {
+    public void addActor(TrustedEconomicActor actor, boolean sync) {
         if(filter.getWatchedAddresses().contains(actor.getAddress()))
             throw new IllegalArgumentException("Actor " + actor.getAddress() + " already added.");
         actors.add(actor);
         filter.watchAddress(actor.getAddress());
+
+        if(sync) {
+            Set<Transaction> possibleMarkers = ixi.findTransactionsByAddress(actor.getAddress());
+            for(Transaction transaction : possibleMarkers) {
+                if(!transaction.isBundleHead)
+                    continue;
+                Bundle possiblyMarker = new Bundle(transaction);
+                if(!possiblyMarker.isStructureValid())
+                    return;
+                actor.processMarker(possiblyMarker);
+            }
+        }
     }
 
     public void removeActor(TrustedEconomicActor actor) {

@@ -101,9 +101,9 @@ h3 {
 }
 
 code {
-    background-color: #EEE;
+    background-color: rgba(0, 0, 0, 0.07);
     border-radius: 3px;
-    padding: 5px 10px;
+    padding: 0.15em 0.3em;
     letter-spacing: -0.05em;
 }
 
@@ -144,6 +144,20 @@ input[type=number] {
 
 input[type=button]:hover {
     background-color: #338;
+}
+
+input[type=checkbox] {
+    width: auto;
+    margin: 0 10px 0 0;
+    vertical-align: text-bottom;
+}
+
+.checkbox_info {
+    width: 300px;
+    font-size: 14px;
+    display: inline-block;
+    padding: 10px;
+    margin: 5px;
 }
 
 hr {

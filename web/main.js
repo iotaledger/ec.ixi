@@ -130,15 +130,18 @@ Btn.submit_transfer = () => {
     const receiver = val("transfers_receiver");
     const remainder = val("transfers_remainder");
     const value = val("transfers_value");
-    Api.submit_transfer(seed, index, receiver, remainder, value, () => { Gui.refresh_transfers(); Gui.hide("new_transfer") });
+    const check_balances = $inputs['transfers_check_balances'].is(":checked");
+    Api.submit_transfer(seed, index, receiver, remainder, value, check_balances, () => { Gui.refresh_transfers(); Gui.hide("new_transfer") });
 };
 
 Btn.issue_marker = () => {
     if(!Gui.validate_form('issue'))
         return;
     const actor = val("issue_actor");
-    const branch = val("issue_branch");
     const trunk = val("issue_trunk");
+    let branch = val("issue_branch");
+    if(branch.length === 0)
+        branch = trunk;
     Api.issue_marker(actor, trunk, branch, () => { Gui.hide("issue"); });
 };
 
@@ -147,7 +150,8 @@ Btn.create_actor = () => {
         return;
     const merkle_tree_depth = parseInt(val("merkle_tree_depth"));
     const seed = random_trytes(81);
-    Api.create_actor(seed, merkle_tree_depth, 0);
+    const add_to_cluster = $inputs['add_to_cluster'].is(":checked");
+    Api.create_actor(seed, merkle_tree_depth, 0,actor => { Gui.refresh_actors(); if(add_to_cluster) Api.set_trust(actor, 1); });
 };
 
 Btn.set_trust = () => {
@@ -274,7 +278,7 @@ Gen.gen_cell_button = (name, onclick) => $("<input>").attr("type", "button").val
 
 /* ***** API WRAPPERS ***** */
 
-Api.submit_transfer = function (seed, index, receiver, remainder, value, callback) {
+Api.submit_transfer = function (seed, index, receiver, remainder, value, check_balances, callback) {
     const request ={
         "action": "submit_transfer",
         "seed": seed,
@@ -282,7 +286,7 @@ Api.submit_transfer = function (seed, index, receiver, remainder, value, callbac
         "receiver": receiver,
         "remainder": remainder,
         "value": value,
-        "check_balances": false
+        "check_balances": check_balances
     };
     Api.ec_request(request, response => callback(response['hash']));
 };
@@ -325,8 +329,8 @@ Api.get_tangle = function (transaction, callback) {
     Api.ec_request({"action": "get_tangle", "transaction": transaction}, response => callback(response['tangle']));
 };
 
-Api.create_actor = function (seed, merkle_tree_depth, start_index) {
-    Api.ec_request({"action": "create_actor", "seed": seed, "depth": merkle_tree_depth, "index": start_index, "security_level": 3}, Gui.refresh_actors);
+Api.create_actor = function (seed, merkle_tree_depth, start_index, callback) {
+    Api.ec_request({"action": "create_actor", "seed": seed, "depth": merkle_tree_depth, "index": start_index, "security_level": 3}, response => callback(response['address']));
 };
 
 Api.remove_actor = function (address) {

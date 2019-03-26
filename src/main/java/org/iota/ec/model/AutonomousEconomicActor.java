@@ -63,7 +63,7 @@ public class AutonomousEconomicActor extends ControlledEconomicActor {
         for(int i = 0; i < tangles.size(); i++) {
             String tangle = tangles.get(i);
             if(tangle.length() != Transaction.Field.BRANCH_HASH.tryteLength + Transaction.Field.TRUNK_HASH.tryteLength)
-                throw new IllegalArgumentException("Not a tangle, nvalid length: " + tangle);
+                throw new IllegalArgumentException("Not a tangle, invalid length: " + tangle);
             if(!isTangleValid(tangle))
                 tangles.remove(i--);
         }

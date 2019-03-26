@@ -65,9 +65,9 @@ class API {
                 return success.put("tangle", getTangle(transaction));
             /* ***** DO ***** */
             case "create_actor":
-                module.createNewActor(SerializableAutoIndexableMerkleTree.fromJSON(requestJSON));
+                String actorAddress = module.createNewActor(SerializableAutoIndexableMerkleTree.fromJSON(requestJSON));
                 Persistence.store(module);
-                return success;
+                return success.put("address", actorAddress);
             case "set_trust":
                 String address = requestJSON.getString("address");
                 double trust = requestJSON.getDouble("trust");

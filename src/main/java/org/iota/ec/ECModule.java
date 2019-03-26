@@ -98,9 +98,10 @@ public class ECModule extends IxiModule {
         return markers;
     }
 
-    void createNewActor(SerializableAutoIndexableMerkleTree merkleTree) {
+    String createNewActor(SerializableAutoIndexableMerkleTree merkleTree) {
         AutonomousEconomicActor actor = new AutonomousEconomicActor(ixi, cluster, initialBalances, merkleTree);
         autonomousActors.add(actor);
+        return actor.getAddress();
     }
 
     void deleteAutonomousActor(String address) {
@@ -120,7 +121,7 @@ public class ECModule extends IxiModule {
             }
         } else if(trust > 0) {
             TrustedEconomicActor trustedEconomicActor = new TrustedEconomicActor(address, trust);
-            cluster.addActor(trustedEconomicActor);
+            cluster.addActor(trustedEconomicActor, true);
         }
     }
 
@@ -176,8 +177,12 @@ public class ECModule extends IxiModule {
     }
 
     private TransferBuilder buildTransfer(SignatureSchemeImplementation.PrivateKey privateKey, BigInteger balance, String receiverAddress, String remainderAddress, BigInteger value, Set<String> references, boolean checkBalances) {
-        if(balance.compareTo(value) < 0 && checkBalances)
-            throw new IllegalArgumentException("insufficient balance (balance="+balance+" < value="+value+")");
+        if(balance.compareTo(value) < 0) {
+            if(checkBalances)
+                throw new IllegalArgumentException("insufficient balance (balance="+balance+" < value="+value+")");
+            balance = value;
+        }
+
         Set<InputBuilder> inputs = value.equals(BigInteger.ZERO) ? Collections.emptySet() : Collections.singleton( new InputBuilder(privateKey, BigInteger.ZERO.subtract(balance)));
         Set<OutputBuilder> outputs = new HashSet<>();
         outputs.add(new OutputBuilder(receiverAddress, value, "EC9RECEIVER"));
