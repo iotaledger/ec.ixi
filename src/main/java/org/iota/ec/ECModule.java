@@ -1,6 +1,9 @@
 package org.iota.ec;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.iota.ec.model.AutonomousEconomicActor;
+import org.iota.ec.model.EconomicActor;
 import org.iota.ec.model.TrustedEconomicActor;
 import org.iota.ec.model.EconomicCluster;
 import org.iota.ec.util.SerializableAutoIndexableMerkleTree;
@@ -15,19 +18,23 @@ import org.iota.ict.model.transaction.TransactionBuilder;
 import org.iota.ict.model.transfer.InputBuilder;
 import org.iota.ict.model.transfer.OutputBuilder;
 import org.iota.ict.model.transfer.TransferBuilder;
+import org.iota.ict.utils.IOHelper;
 import org.iota.ict.utils.Trytes;
 import org.iota.ict.utils.crypto.SignatureSchemeImplementation;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.*;
 
 public class ECModule extends IxiModule {
 
-    private static final int TIPS_PER_TRANSFER = 1;
     private static final int TRANSFER_SECURITY = 1;
     private static final double CONFIRMATION_CONFIDENCE = 0.95;
+    private static final Logger logger = LogManager.getLogger("EC.ixi");
+    private static final String WEB_GUI_LOCATION = "./web/dist/EC.ixi";
 
     private final API api;
     private final EconomicCluster cluster;
@@ -43,11 +50,28 @@ public class ECModule extends IxiModule {
         this.api = new API(this);
     }
 
+    /****** WEB GUI ******/
+
+    private static void extractGUI() {
+        try{
+            logger.info("extracting web gui ...");
+            IOHelper.extractDirectoryFromJarFile(ECModule.class, "/web",WEB_GUI_LOCATION );
+            logger.info("completed extracting web gui");
+        } catch (IOException e) {
+
+        }
+    }
+
+    private static boolean startedFromJar() {
+        String pathToEC = ECModule.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+        return pathToEC.endsWith(".jar");
+    }
+
     /****** IXI ******/
 
     @Override
     public void run() {
-        System.err.println("EC is running!");
+
     }
 
     @Override
@@ -57,12 +81,16 @@ public class ECModule extends IxiModule {
 
     @Override
     public void onStarted() {
+        logger.info("started EC, loading from persistence ...");
         Persistence.load(this);
+        logger.info("completed loading from persistence");
     }
 
     @Override
     public void onTerminate() {
+        logger.info("terminating EC, storing to persistence ...");
         Persistence.store(this);
+        logger.info("completed storing to persistence");
     }
 
     private class ECContext extends SimpleIxiContext {
@@ -71,13 +99,19 @@ public class ECModule extends IxiModule {
         }
     }
 
+    @Override
+    public void install() {
+        if(startedFromJar() && !new File(WEB_GUI_LOCATION).exists())
+            extractGUI();
+    }
+
     /****** SERVICES ******/
 
-    void considerTangle(String actorAddress, String trunk, String branch) {
+    void considerTangle(String actorAddress, String ref1, String ref2) {
         AutonomousEconomicActor actor = findAutonomousActor(actorAddress);
         if(actor == null)
             throw new IllegalArgumentException("None of the actors controlled by you has the address '"+actorAddress+"'");
-        actor.tick(Collections.singleton(trunk+branch));
+        actor.tick(Collections.singleton(EconomicActor.tangleID(ref1, ref2)));
     }
 
     double getConfidence(String hash) {

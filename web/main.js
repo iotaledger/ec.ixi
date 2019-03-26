@@ -49,6 +49,7 @@ function init_functions() {
     const shorten = (hash) => $("<div>").addClass("copyable").text(hash.substr(0, 30) + "…")
         .append(identicon(hash))
         .click(() => {copy_to_clipboard(hash)})
+        .attr("title", "click to copy ");
 
     const percentage = (number) => parseFloat(number * 100).toFixed(1) + "%";
 

@@ -26,9 +26,9 @@ public class AutonomousEconomicActorTest extends IctTestTemplate {
         ControlledEconomicActor otherA = new ControlledEconomicActor(randomMerkleTree(3));
         ControlledEconomicActor otherB = new ControlledEconomicActor(randomMerkleTree(3));
 
-        cluster.addActor(new TrustedEconomicActor(underTest.getAddress(), 0.5));
-        cluster.addActor(new TrustedEconomicActor(otherA.getAddress(), 0.3));
-        cluster.addActor(new TrustedEconomicActor(otherB.getAddress(), 0.2));
+        cluster.addActor(new TrustedEconomicActor(underTest.getAddress(), 0.5), false);
+        cluster.addActor(new TrustedEconomicActor(otherA.getAddress(), 0.3), false);
+        cluster.addActor(new TrustedEconomicActor(otherB.getAddress(), 0.2), false);
 
         SignatureSchemeImplementation.PrivateKey key1 = SignatureSchemeImplementation.derivePrivateKeyFromSeed(Trytes.randomSequenceOfLength(81), 0, 1);
         SignatureSchemeImplementation.PrivateKey key2 = SignatureSchemeImplementation.derivePrivateKeyFromSeed(Trytes.randomSequenceOfLength(81), 0, 1);
@@ -77,9 +77,9 @@ public class AutonomousEconomicActorTest extends IctTestTemplate {
         AutonomousEconomicActor auto2 = new AutonomousEconomicActor(ict, cluster, initialBalances, randomMerkleTree(5));
         AutonomousEconomicActor auto3 = new AutonomousEconomicActor(ict, cluster, initialBalances, randomMerkleTree(5));
 
-        cluster.addActor(new TrustedEconomicActor(auto1.getAddress(), 0.5));
-        cluster.addActor(new TrustedEconomicActor(auto2.getAddress(), 0.3));
-        cluster.addActor(new TrustedEconomicActor(auto3.getAddress(), 0.2));
+        cluster.addActor(new TrustedEconomicActor(auto1.getAddress(), 0.5), false);
+        cluster.addActor(new TrustedEconomicActor(auto2.getAddress(), 0.3), false);
+        cluster.addActor(new TrustedEconomicActor(auto3.getAddress(), 0.2), false);
 
         String transfer1 = submitBundle(ict, buildValidTransfer(key, value, Trytes.randomSequenceOfLength(81), Collections.<String>emptySet()));
         String transfer2 = submitBundle(ict, buildValidTransfer(key, value, Trytes.randomSequenceOfLength(81), Collections.<String>emptySet()));
@@ -124,8 +124,8 @@ public class AutonomousEconomicActorTest extends IctTestTemplate {
         AutonomousEconomicActor auto1 = new AutonomousEconomicActor(ict, cluster, initialBalances, randomMerkleTree(5));
         AutonomousEconomicActor auto2 = new AutonomousEconomicActor(ict, cluster, initialBalances, randomMerkleTree(5));
 
-        cluster.addActor(new TrustedEconomicActor(auto1.getAddress(), 0.4));
-        cluster.addActor(new TrustedEconomicActor(auto2.getAddress(), 0.6));
+        cluster.addActor(new TrustedEconomicActor(auto1.getAddress(), 0.4), false);
+        cluster.addActor(new TrustedEconomicActor(auto2.getAddress(), 0.6), false);
 
         String transfer1 = submitBundle(ict, buildValidTransfer(key, value, Trytes.randomSequenceOfLength(81), Collections.<String>emptySet()));
 

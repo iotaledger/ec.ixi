@@ -19,7 +19,7 @@ public class EconomicClusterTest extends IctTestTemplate {
         ControlledEconomicActor ca = new ControlledEconomicActor(new SerializableAutoIndexableMerkleTree(Trytes.randomSequenceOfLength(81), 3,3));
         EconomicCluster cluster = new EconomicCluster(ict);
         TrustedEconomicActor ta = new TrustedEconomicActor(ca.getAddress(),0.2);
-        cluster.addActor(ta);
+        cluster.addActor(ta, false);
 
         Transaction transaction = new TransactionBuilder().build();
         ict.submit(transaction);
@@ -43,8 +43,7 @@ public class EconomicClusterTest extends IctTestTemplate {
         Ict ict = createIct();
         ControlledEconomicActor ca = new ControlledEconomicActor(new SerializableAutoIndexableMerkleTree(Trytes.randomSequenceOfLength(81), 3,3));
         EconomicCluster cluster = new EconomicCluster(ict);
-        TrustedEconomicActor ta = new TrustedEconomicActor(ca.getAddress(),1);
-        cluster.addActor(ta);
+        cluster.addActor(new TrustedEconomicActor(ca.getAddress(),1), false);
 
         Transaction transaction = new TransactionBuilder().build();
         ict.submit(transaction);
@@ -85,9 +84,9 @@ public class EconomicClusterTest extends IctTestTemplate {
         TrustedEconomicActor ta1 = new TrustedEconomicActor(ca1.getAddress(),0.2);
         TrustedEconomicActor ta2 = new TrustedEconomicActor(ca2.getAddress(),0.3);
         TrustedEconomicActor ta3 = new TrustedEconomicActor(ca3.getAddress(),0.4);
-        cluster.addActor(ta1);
-        cluster.addActor(ta2);
-        cluster.addActor(ta3);
+        cluster.addActor(ta1, false);
+        cluster.addActor(ta2, false);
+        cluster.addActor(ta3, false);
 
         double maxTrust = ta1.getTrust() + ta2.getTrust() + ta3.getTrust();
 
@@ -117,8 +116,7 @@ public class EconomicClusterTest extends IctTestTemplate {
         ControlledEconomicActor ca = new ControlledEconomicActor(new SerializableAutoIndexableMerkleTree(Trytes.randomSequenceOfLength(81), 3,3));
 
         EconomicCluster cluster = new EconomicCluster(ictB);
-        TrustedEconomicActor ta = new TrustedEconomicActor(ca.getAddress(),0.2);
-        cluster.addActor(ta);
+        cluster.addActor(new TrustedEconomicActor(ca.getAddress(),0.2), false);
 
         Transaction transaction = new TransactionBuilder().build();
         ictA.submit(transaction);

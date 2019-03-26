@@ -152,6 +152,10 @@ input[type=number] {
     width: 100px;
 }
 
+input[type=number]#merkle_tree_depth {
+    width: 160px;
+}
+
 input[type=button]:hover {
     background-color: #338;
 }

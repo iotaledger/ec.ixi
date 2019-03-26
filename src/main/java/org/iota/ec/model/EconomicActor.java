@@ -21,7 +21,7 @@ public abstract class EconomicActor {
         return SignatureSchemeImplementation.hash(trunk + branch);
     }
 
-    protected static String tangleID(String reference1, String reference2) {
+    public static String tangleID(String reference1, String reference2) {
         return reference1.compareTo(reference2) < 0 ? reference1 + reference2 : reference2 + reference1;
     }
 
