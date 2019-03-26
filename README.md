@@ -8,6 +8,19 @@ the Ict core protocol but an optional extension. In this repoistory EC has been 
 module which you can install on your Ict node to extend it with the consensus mechanism. This allows you to come to
 consensus with others on the confirmation state of transactions.
 
+## State of Development
+
+EC.ixi will be developed in iterations. This incremental approach allows to incorporate feedback during the development process. As such it should not be considered finished software. As of now, this module is in an early stage that would best be described as *Proof-of-Concept*. It can already be used for demonstration purposes and to gain a conceptual understanding of Economic Clustering. However, it requires more development until it can be used for practical consensus based applications. **The following features are still missing:**
+
+**Clusters:**
+* scalability in regards to estimating confidence based on many trusted actors
+* ability to adjust trust based on actor behaviour
+
+**Controlled Actors:**
+* scalability in regards to calculating confidence based on many marked Tangles
+* scalability in regards to ledger validation of large Tangles
+* ability to work with incomplete (pruned) Tangles
+
 ## Installation
 
 ### Simple Installation (Download)
