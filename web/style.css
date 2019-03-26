@@ -154,6 +154,10 @@ table td input[type=button] {
     margin: 0 5px;
 }
 
+img.identicon {
+    margin: -2px 3px;
+}
+
 /***** D3 *****/
 
 #tangle svg .links line {

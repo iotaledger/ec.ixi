@@ -17,6 +17,20 @@ window.onload = function () {
     Gui.refresh_transfers();
 };
 
+function trytes_to_hex(trytes) {
+    const HEX = "0123456789ABCDEF";
+    let hex = "";
+    for(let i = 0; i < trytes.length; i++)
+        hex += HEX[(trytes[i] === '9' ? 0 : (trytes.charCodeAt(i)-'A'.charCodeAt(0))+1)%16];
+    console.log(hex);
+    return hex;
+}
+
+function identicon(trytes) {
+    const identicon = new Identicon(trytes_to_hex(trytes), 16).toString();
+    return $('<img width=16 height=16 class="identicon" src="data:image/png;base64,' + identicon + '">');
+}
+
 function init_elements() {
 
     $('input').each((_, $el) => { $inputs[$el.id] = $($el); });
@@ -34,6 +48,7 @@ function get_table(id) {
 function init_functions() {
 
     const shorten = (hash) => $("<div>").text(hash.substr(0, 30) + "…")
+        .append(identicon(hash))
         .append(Gen.gen_cell_button("copy", () => {copy_to_clipboard(hash)}));
 
     const percentage = (number) => parseFloat(number * 100).toFixed(1) + "%";
