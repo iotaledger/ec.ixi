@@ -20,6 +20,7 @@
     <div id="content">
         <form class="section" id="wallet">
             <h2>Wallet</h2>
+            <p class="info">The wallet contains your addresses. You can issue new transfers from here. You can add balances in the <b>Cluster</b> section.</p>
             <input type="text" placeholder="seed" id="seed" pattern="[A-Z9]{30,81}">
             <input type="button" value="load wallet" onclick="Gui.refresh_wallet()">
             <table></table>
@@ -27,26 +28,33 @@
 
         <div class="section" id="transfers">
             <h2>Transfers</h2>
+            <p class="info">This section keeps track of all transfers you submitted.</p>
             <table></table>
         </div>
 
         <div class="section" id="cluster">
             <h2>Cluster</h2>
-            <form id="change_balance">
-                <input type="text" placeholder="address" id="change_balance_address" pattern="[A-Z9]{30,81}">
-                <input type="number" placeholder="to add" id="change_balance_to_add" pattern="[0-9]+" step="1" min="-2800000000000000" max="2800000000000000">
-                <input type="button" value="change balance" onclick="Btn.change_balance();">
-            </form>
+            <p class="info">This is the Economic Cluster you are part in. Add economic actors you trust, whether they are yours (section <b>Actors</b>) or owned by others.</p>
             <form id="set_trust">
                 <input type="text" placeholder="address" id="cluster_address" pattern="[A-Z9]{81}">
                 <input type="number" placeholder="trust" id="cluster_trust" step="0.01" min="0" max="1000000">
                 <input type="button" value="add" onclick="Btn.set_trust();">
             </form>
             <table></table>
+            <hr>
+            <h3>Change Balance</h3>
+            <p class="info">You can adjust the initial balance of an address here. If your cluster contains actors you do not control, make sure their owners adjust the balance as well.</p>
+            <form id="change_balance">
+                <input type="text" placeholder="address" id="change_balance_address" pattern="[A-Z9]{30,81}">
+                <input type="number" placeholder="to add" id="change_balance_to_add" pattern="[0-9]+" step="1" min="-2800000000000000" max="2800000000000000">
+                <input type="button" value="change balance" onclick="Btn.change_balance();">
+            </form>
         </div>
 
         <form class="section" id="actors">
             <h2>Actors</h2>
+            <p class="info">These are your own actors. You can make them issue new markers to adjust their confidences. Make sure to add them to your cluster. The <code>merkle tree depth</code>
+            determines how often they can update their confidence.</p>
             <input type="number" placeholder="merkle tree depth" id="merkle_tree_depth" step="1" min="1" max="7" pattern="[1-7]">
             <input type="button" value="create" onclick="Btn.create_actor();">
             <table></table>

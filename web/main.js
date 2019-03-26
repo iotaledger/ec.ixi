@@ -36,7 +36,7 @@ function init_elements() {
     $('input').each((_, $el) => { $inputs[$el.id] = $($el); });
     val("seed", random_trytes(81));
     val("merkle_tree_depth",5);
-    val("cluster_trust", 0.2);
+    val("cluster_trust", 1);
 }
 
 function get_table(id) {
@@ -47,9 +47,9 @@ function get_table(id) {
 
 function init_functions() {
 
-    const shorten = (hash) => $("<div>").text(hash.substr(0, 30) + "…")
+    const shorten = (hash) => $("<div>").addClass("copyable").text(hash.substr(0, 30) + "…")
         .append(identicon(hash))
-        .append(Gen.gen_cell_button("copy", () => {copy_to_clipboard(hash)}));
+        .click(() => {copy_to_clipboard(hash)})
 
     const percentage = (number) => parseFloat(number * 100).toFixed(1) + "%";
 
@@ -75,20 +75,20 @@ function init_functions() {
         shorten(actor),
         $("<div>")
             .append(Gen.gen_cell_button("issue", () => { val("issue_actor", actor); Gui.show("issue"); }))
-            .append(Gen.gen_cell_button("✘", () => { Api.remove_actor(actor) }))
+            .append(Gen.gen_cell_button("✘", () => { Api.remove_actor(actor) }).addClass("delete"))
     ];
 
     const cluster_serialize = entry => [
         shorten(entry['address']),
         entry['trust_abs'] + " ("+percentage(entry['trust_rel'])+")",
         $("<div>").append(Gen.gen_cell_button("markers", () => { Gui.refresh_markers(entry['address']); Gui.show("markers"); }))
-            .append(Gen.gen_cell_button("✘", () => {Api.set_trust(entry['address'], 0)}))
+            .append(Gen.gen_cell_button("✘", () => {Api.set_trust(entry['address'], 0)}).addClass("delete"))
     ];
 
     const transfers_serialize = hash => [
         shorten(hash),
         $("<div>").append(Gen.gen_cell_button("status", () => { Gui.load_transactions(hash) }))
-            .append(Gen.gen_cell_button("✘", () => { Api.remove_transfer(hash) }))
+            .append(Gen.gen_cell_button("✘", () => { Api.remove_transfer(hash) }).addClass("delete"))
     ];
 
     const transactions_serialize = entry => [
@@ -111,7 +111,7 @@ function init_functions() {
         percentage(entry['confidence'])
     ];
 
-    Gui.display_balances = Gen.gen_display_function('wallet', ["index", "address", "balance", ""], wallet_serialize);
+    Gui.display_balances = Gen.gen_display_function('wallet', ["", "address", "balance", ""], wallet_serialize);
     Gui.display_actors = Gen.gen_display_function("actors", ["address", ""], actors_serialize);
     Gui.display_cluster = Gen.gen_display_function("cluster", ["address", "trust", ""], cluster_serialize);
     Gui.display_transfers = Gen.gen_display_function("transfers", ["transfer", ""], transfers_serialize);

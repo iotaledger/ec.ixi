@@ -47,16 +47,31 @@ header p {
 
 .section {
     display: inline-block;
-    background-color: #FFF;
-    min-height: 500px;
-    max-height: 500px;
+    background-color: #F8F8F8;
+    min-height: 550px;
+    max-height: 550px;
     min-width: 500px;
+    max-width: 700px;
     overflow-y: auto;
     border-radius: 10px;
     margin: 20px;
     padding: 20px 30px;
     vertical-align: top;
+    text-align: center;
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    transition: 0.2s background-color, 0.2s box-shadow;
+}
+
+.section:hover {
+    background-color: #FFF;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+}
+
+.section p.info {
+    font-size: 12px;
+    margin: 10px auto 20px auto;
+    color: rgba(0, 0, 0, 0.7);
+    max-width: 450px;
 }
 
 .dialog {
@@ -79,6 +94,10 @@ h2 {
     font-size: 24px;
     font-weight: normal;
     margin: 15px 0 30px 0;
+}
+
+h3 {
+    font-size: 18px;
 }
 
 code {
@@ -127,10 +146,16 @@ input[type=button]:hover {
     background-color: #338;
 }
 
+hr {
+    border: none;
+    border-bottom: 1px dotted #BBB;
+    margin: 50px 0;
+}
+
 table {
     font-family: monospace;
     font-size: 14px;
-    margin: 50px 0 20px 0;
+    margin: 50px auto 20px auto;
     border-collapse: collapse;
     text-align: right;
     border-spacing: 10px;
@@ -152,6 +177,14 @@ table td input[type=button] {
     display: inline-block;
     width: auto;
     margin: 0 5px;
+}
+
+.copyable {
+    cursor: pointer;
+}
+
+table td input[type=button].delete {
+    background-color: #BB0000;
 }
 
 img.identicon {
