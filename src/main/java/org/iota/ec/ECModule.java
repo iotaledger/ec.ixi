@@ -111,7 +111,7 @@ public class ECModule extends IxiModule {
         AutonomousEconomicActor actor = findAutonomousActor(actorAddress);
         if(actor == null)
             throw new IllegalArgumentException("None of the actors controlled by you has the address '"+actorAddress+"'");
-        actor.tick(Collections.singleton(EconomicActor.tangleID(ref1, ref2)));
+        actor.tick(ref1.isEmpty() || ref2.isEmpty() ? Collections.emptySet() : Collections.singleton(EconomicActor.tangleID(ref1, ref2)));
     }
 
     double getConfidence(String hash) {

@@ -72,10 +72,12 @@ function init_functions() {
     ];
 
     const actors_serialize = actor => [
-        shorten(actor),
+        shorten(actor['address']),
+        actor['merkle_tree_index']+"/"+actor['merkle_tree_capacity'],
         $("<div>")
-            .append(Gen.gen_cell_button("issue", () => { val("issue_actor", actor); Gui.show("issue"); }))
-            .append(Gen.gen_cell_button("✘", () => { Api.remove_actor(actor) }).addClass("delete"))
+            .append(Gen.gen_cell_button("issue", () => { val("issue_actor", actor['address']); Gui.show("issue"); }))
+            .append(Gen.gen_cell_button("tick", () => { Api.issue_marker(actor['address'], "", "", () => { Gui.refresh_actors(); }); }))
+            .append(Gen.gen_cell_button("✘", () => { Api.remove_actor(actor['address']) }).addClass("delete"))
     ];
 
     const cluster_serialize = entry => [
@@ -112,7 +114,7 @@ function init_functions() {
     ];
 
     Gui.display_balances = Gen.gen_display_function('wallet', ["", "address", "balance", ""], wallet_serialize);
-    Gui.display_actors = Gen.gen_display_function("actors", ["address", ""], actors_serialize);
+    Gui.display_actors = Gen.gen_display_function("actors", ["address", "markers", ""], actors_serialize);
     Gui.display_cluster = Gen.gen_display_function("cluster", ["address", "trust", ""], cluster_serialize);
     Gui.display_transfers = Gen.gen_display_function("transfers", ["transfer", ""], transfers_serialize);
     Gui.display_transactions = Gen.gen_display_function("transactions", ["hash", "address", "value", "confidence"], transactions_serialize);
@@ -147,7 +149,7 @@ Btn.issue_marker = () => {
     let branch = val("issue_branch");
     if(branch.length === 0)
         branch = trunk;
-    Api.issue_marker(actor, trunk, branch, () => { Gui.hide("issue"); });
+    Api.issue_marker(actor, trunk, branch, () => { Gui.hide("issue"); Gui.refresh_actors(); });
 };
 
 Btn.create_actor = () => {

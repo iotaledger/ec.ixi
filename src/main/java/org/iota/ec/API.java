@@ -89,6 +89,7 @@ class API {
                 return success.put("hash", hash);
             case "issue_marker":
                 performActionIssueMarker(requestJSON);
+                Persistence.store(module);
                 return success;
             case "change_balance": {
                 performActionChangeBalance(requestJSON);
@@ -237,7 +238,11 @@ class API {
     private JSONArray getActorsJSON() {
         JSONArray actorsJSON = new JSONArray();
         for(AutonomousEconomicActor actor : module.getAutonomousActors()) {
-            actorsJSON.put(actor.getAddress());
+            JSONObject entry = new JSONObject();
+            entry.put("address", actor.getAddress());
+            entry.put("merkle_tree_index", actor.getMerkleTree().getIndex());
+            entry.put("merkle_tree_capacity", (int)Math.pow(2, actor.getMerkleTree().getDepth()));
+            actorsJSON.put(entry);
         }
         return actorsJSON;
     }
