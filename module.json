@@ -4,6 +4,6 @@
   "main_class": "org.iota.ec.ECModule",
   "description": "Economic Clustering brings consensus to Ict.",
   "repository": "iotaledger/ec.ixi",
-  "gui_port": -1,
+  "gui_port": 0,
   "supported_versions": ["0.6-SNAPSHOT"]
 }

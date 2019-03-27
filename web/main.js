@@ -360,7 +360,7 @@ Api.change_balance = function (address, to_add) {
 /* ***** API ***** */
 
 Api.ec_request = (request, success) => {
-    Api.ajax("getModuleResponse", {"request": JSON.stringify(request), "path": "virtual/EC.ixi"}, data => {
+    Api.ajax("getModuleResponse", {"request": JSON.stringify(request), "path": "ec.ixi-1.0.jar"}, data => {
         const response = JSON.parse(data['response']);
         response['success'] ? (success ? success(response) : {}) : Gui.handle_error("api error: " + response['error'].replace(/[A-Z9]{81}/g, "<code class='hash'>$&</code>"));
     });

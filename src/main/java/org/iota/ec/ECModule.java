@@ -34,7 +34,7 @@ public class ECModule extends IxiModule {
     private static final int TRANSFER_SECURITY = 1;
     private static final double CONFIRMATION_CONFIDENCE = 0.95;
     private static final Logger logger = LogManager.getLogger("EC.ixi");
-    private static final String WEB_GUI_LOCATION = "./web/dist/EC.ixi";
+    private static final String WEB_GUI_LOCATION = "./web/dist/modules/EC.ixi";
 
     private final API api;
     private final EconomicCluster cluster;
@@ -55,7 +55,8 @@ public class ECModule extends IxiModule {
     private static void extractGUI() {
         try{
             logger.info("extracting web gui ...");
-            IOHelper.extractDirectoryFromJarFile(ECModule.class, "/web",WEB_GUI_LOCATION );
+            new File(WEB_GUI_LOCATION).mkdirs();
+            IOHelper.extractDirectoryFromJarFile(ECModule.class, "web/", WEB_GUI_LOCATION );
             logger.info("completed extracting web gui");
         } catch (IOException e) {
 

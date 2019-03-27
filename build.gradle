@@ -27,10 +27,11 @@ dependencies {
 
 task ixi(type: Jar) {
     baseName = 'ec.ixi'
-    destinationDir = file("$rootDir/modules")
+    destinationDir = file("$rootDir")
     from("./") {
         include 'module.json'
         include 'web/**'
+        exclude 'web/.idea'
     }
     exclude ("org/iota/ict/**")
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
