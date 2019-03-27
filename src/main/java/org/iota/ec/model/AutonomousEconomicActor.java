@@ -18,7 +18,7 @@ public class AutonomousEconomicActor extends ControlledEconomicActor {
     private final EconomicCluster economicCluster;
     private final Set<String> validTangles = new HashSet<>();
     private final Set<String> invalidTangles = new HashSet<>();
-    private double aggressivity = 1.1;
+    private double aggressivity = 1.1, conservativity = 20.0;
 
     public AutonomousEconomicActor(Ixi ixi, EconomicCluster economicCluster, Map<String, BigInteger> initialBalances, SerializableAutoIndexableMerkleTree merkleTree) {
         super(merkleTree);
@@ -29,6 +29,10 @@ public class AutonomousEconomicActor extends ControlledEconomicActor {
 
     public void setAggressivity(double aggressivity) {
         this.aggressivity = aggressivity;
+    }
+
+    public void setConservativity(double conservativity) {
+        this.conservativity = conservativity;
     }
 
     public void changeInitialBalance(String address, BigInteger toAdd) {
@@ -83,18 +87,20 @@ public class AutonomousEconomicActor extends ControlledEconomicActor {
         double[] initialProbabilities = new double[tangles.size()];
         for(int i = 0; i < tangles.size(); i++) {
             String tangle = tangles.get(i);
-            initialProbabilities[i] = guessApprovalConfidence(tangle);
+            initialProbabilities[i] = guessApprovalConfidence(tangle, tangles.size());
         }
         return new ConfidenceCalculator(tangles, conflicts, initialProbabilities);
     }
 
-    protected double guessApprovalConfidence(String tangle) {
-        String ref1 = tangle.substring(0, 81);
-        String ref2 = tangle.substring(81);
-        double confidenceRef1 = economicCluster.determineApprovalConfidence(ref1);
-        double confidenceRef2 = economicCluster.determineApprovalConfidence(ref2);
+    protected double guessApprovalConfidence(String tangle, int amountOfTangles) {
+        double confidenceRef1 = guessTransactionApprovalConfidence(tangle.substring(0, 81), amountOfTangles);
+        double confidenceRef2 = guessTransactionApprovalConfidence(tangle.substring(81), amountOfTangles);
         return (mostConfident != null && mostConfident.getKey().equals(tangle) ? 1+aggressivity : 1) * Math.min(confidenceRef1, confidenceRef2);
-        // TODO improve
+    }
+
+    private double guessTransactionApprovalConfidence(String transaction, int amountOfTangles) {
+        double turnout = economicCluster.determineTurnout(transaction);
+        return turnout * economicCluster.determineApprovalConfidence(transaction) + (1-turnout) / amountOfTangles;
     }
 
     protected Set<ConfidenceCalculator.Conflict> findAllConflicts(List<String> tangles) {
@@ -115,7 +121,7 @@ public class AutonomousEconomicActor extends ControlledEconomicActor {
         double oldConfidence = publishedConfidenceByMarkedTangle.getOrDefault(tangle, new Double(0));
         boolean shouldIssueNewMarker = !publishedConfidenceByMarkedTangle.containsKey(tangle) || shouldIssueMarkerToUpdateConfidence(oldConfidence, newConfidence);
         if(shouldIssueNewMarker) {
-            double conservativeConfidence = oldConfidence + (newConfidence - oldConfidence) / 20.0;
+            double conservativeConfidence = oldConfidence + (newConfidence - oldConfidence) / conservativity;
             publishedConfidenceByMarkedTangle.put(tangle, conservativeConfidence);
             String trunk = tangle.substring(0, 81);
             String branch = tangle.substring(81);

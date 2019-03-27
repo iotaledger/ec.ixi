@@ -11,10 +11,13 @@ const Graph = {};
 window.onload = function () {
     init_elements();
     init_functions();
-    Gui.refresh_wallet();
-    Gui.refresh_actors();
-    Gui.refresh_cluster();
-    Gui.refresh_transfers();
+
+    Api.ajax("getConfig", {}, () => {
+        Gui.refresh_wallet();
+        Gui.refresh_actors();
+        Gui.refresh_cluster();
+        Gui.refresh_transfers();
+    });
 };
 
 function trytes_to_hex(trytes) {
@@ -360,14 +363,16 @@ Api.change_balance = function (address, to_add) {
 /* ***** API ***** */
 
 Api.ec_request = (request, success) => {
-    Api.ajax("getModuleResponse", {"request": JSON.stringify(request), "path": "ec.ixi-1.0.jar"}, data => {
+    Api.ajax("getModuleResponse", {"request": JSON.stringify(request), "path": "virtual/ec.ixi-1.0.jar"}, data => {
         const response = JSON.parse(data['response']);
         response['success'] ? (success ? success(response) : {}) : Gui.handle_error("api error: " + response['error'].replace(/[A-Z9]{81}/g, "<code class='hash'>$&</code>"));
     });
 };
 
+Api.password = "change_me_now";
+
 Api.ajax = (path, data, success) => {
-    data['password'] = "change_me_now";
+    data['password'] = Api.password;
     $.ajax({
         url: "http://localhost:2187/" + path,
         method: "POST",
@@ -375,9 +380,10 @@ Api.ajax = (path, data, success) => {
         dataType: "json",
         success: success,
         error: (error) => {
+            console.log(error.status);
             Gui.handle_error(error['status'] === 0 ? "Could not reach your Ict node. Is it running with API enabled on port 2187?" : JSON.stringify(error));
         }
-    });
+    })
 };
 
 Api.serialize_post_data = (data) => {

@@ -65,6 +65,16 @@ public class EconomicCluster implements GossipListener {
         return maxAbsTrust > 0 ? absTrust / maxAbsTrust : 0;
     }
 
+    public double determineTurnout(String transactionHash) {
+        double maxAbsTurnout = calcMaxAbsTrust();
+        double absTurnout = 0;
+        for(TrustedEconomicActor actor : actors) {
+            if(actor.hasReferenced(transactionHash))
+                absTurnout += actor.getTrust();
+        }
+        return maxAbsTurnout > 0 ? absTurnout / maxAbsTurnout : 0;
+    }
+
     private double calcMaxAbsTrust() {
         double trustSum = 0;
         for(TrustedEconomicActor actor : actors) {

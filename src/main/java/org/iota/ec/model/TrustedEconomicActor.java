@@ -36,6 +36,14 @@ public class TrustedEconomicActor extends EconomicActor {
         return 0;
     }
 
+    public boolean hasReferenced(String transactionHash) {
+        for(SubTangle subTangle : subTanglesOrderedByDescendingConfidence) {
+            if(subTangle.references(transactionHash))
+                return true;
+        }
+        return false;
+    }
+
     public double getTrust() {
         return trust;
     }
