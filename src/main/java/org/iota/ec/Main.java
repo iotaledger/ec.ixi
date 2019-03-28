@@ -12,7 +12,6 @@ public class Main {
         } catch (Throwable t) {
             t.printStackTrace();
         }
-        System.out.println(ict.getModuleHolder().getModule("ec.ixi-1.0.jar") == null);
         ict.getModuleHolder().startAllModules();
     }
 }
