@@ -45,11 +45,8 @@ public class AutonomousEconomicActor extends ControlledEconomicActor {
     public void tick(Collection<String> newTangles) {
         // TODO do not consider all which is too computationally expensive
         List<String> tangles = new LinkedList<>(economicCluster.getAllTangles());
-        System.out.println(".   " + tangles.size());
         tangles.addAll(newTangles);
-        System.out.println("..  " + tangles.size());
         removeInvalidTangles(tangles);
-        System.out.println("... " + tangles.size());
         ConfidenceCalculator confidenceCalculator = createConfidenceCalculator(tangles);
         Map<String, Double> newConfidenceByTangle = new HashMap<>();
         for(String tangle : tangles) {

@@ -7,6 +7,8 @@ import org.iota.ec.model.EconomicActor;
 import org.iota.ec.model.TrustedEconomicActor;
 import org.iota.ec.model.EconomicCluster;
 import org.iota.ec.util.SerializableAutoIndexableMerkleTree;
+import org.iota.ict.eee.call.EEEFunction;
+import org.iota.ict.eee.call.FunctionEnvironment;
 import org.iota.ict.ixi.Ixi;
 import org.iota.ict.ixi.IxiModule;
 import org.iota.ict.ixi.context.IxiContext;
@@ -36,6 +38,7 @@ public class ECModule extends IxiModule {
     private static final Logger logger = LogManager.getLogger("EC.ixi");
     private static final String WEB_GUI_LOCATION = "./web/dist/modules/EC.ixi";
 
+    private final EEEFunction confidenceEEEFunction = new EEEFunction(new FunctionEnvironment("EC.ixi", "confidence"));
     private final API api;
     private final EconomicCluster cluster;
     private final List<AutonomousEconomicActor> autonomousActors = new LinkedList<>();
@@ -72,7 +75,13 @@ public class ECModule extends IxiModule {
 
     @Override
     public void run() {
-
+        while (isRunning()) {
+            try {
+                processConfidenceRequest(confidenceEEEFunction.requestQueue.take());
+            } catch (InterruptedException e) {
+                if(isRunning()) throw new RuntimeException(e);
+            }
+        }
     }
 
     @Override
@@ -85,6 +94,7 @@ public class ECModule extends IxiModule {
         logger.info("started EC, loading from persistence ...");
         Persistence.load(this);
         logger.info("completed loading from persistence");
+        ixi.addListener(confidenceEEEFunction);
     }
 
     @Override
@@ -92,6 +102,8 @@ public class ECModule extends IxiModule {
         logger.info("terminating EC, storing to persistence ...");
         Persistence.store(this);
         logger.info("completed storing to persistence");
+        ixi.removeListener(confidenceEEEFunction);
+        runningThread.interrupt();
     }
 
     private class ECContext extends SimpleIxiContext {
@@ -107,6 +119,11 @@ public class ECModule extends IxiModule {
     }
 
     /****** SERVICES ******/
+
+    void processConfidenceRequest(EEEFunction.Request request) {
+        String hash = request.argument;
+        request.submitReturn(ixi, ""+cluster.determineApprovalConfidence(hash));
+    }
 
     void considerTangle(String actorAddress, String ref1, String ref2) {
         AutonomousEconomicActor actor = findAutonomousActor(actorAddress);
