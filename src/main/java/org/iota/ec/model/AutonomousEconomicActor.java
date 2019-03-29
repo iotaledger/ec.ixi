@@ -39,6 +39,9 @@ public class AutonomousEconomicActor extends ControlledEconomicActor {
         ledgerValidator.changeInitialBalance(address, toAdd);
     }
 
+    public void tick() {
+        tick(Collections.emptySet());
+    }
     public void tick(Collection<String> newTangles) {
         // TODO do not consider all which is too computationally expensive
         List<String> tangles = new LinkedList<>(economicCluster.getAllTangles());

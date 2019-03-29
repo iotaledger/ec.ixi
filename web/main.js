@@ -7,18 +7,23 @@ const Gen = {};
 const Api = {};
 const Btn = {};
 const Graph = {};
+const Cookies = {};
 
 window.onload = function () {
     init_elements();
     init_functions();
+    init_data();
+};
 
+function init_data() {
     Api.ajax("getConfig", {}, () => {
+        $("#content").removeClass("hidden");
         Gui.refresh_wallet();
         Gui.refresh_actors();
         Gui.refresh_cluster();
         Gui.refresh_transfers();
     });
-};
+}
 
 function trytes_to_hex(trytes) {
     const HEX = "0123456789ABCDEF";
@@ -30,7 +35,7 @@ function trytes_to_hex(trytes) {
 
 function identicon(trytes) {
     const identicon = new Identicon(trytes_to_hex(trytes), 16).toString();
-    return $('<img width=16 height=16 class="identicon" src="data:image/png;base64,' + identicon + '">');
+    return $('<img width=16 height=16 class="identicon" src="data:image/png;base64,' + identicon + '" alt="identicon">');
 }
 
 function init_elements() {
@@ -124,6 +129,27 @@ function init_functions() {
     Gui.display_confidences = Gen.gen_display_function("confidences", ["actor", "confidence"], confidences_serialize);
     Gui.display_markers = Gen.gen_display_function("markers", ["reference #1", "reference #2", "confidence"], markers_serialize);
 }
+
+/* ***** COOKIES ***** */
+
+Cookies.set = function (name, value) {
+    let date = new Date();
+    date.setTime(date.getTime() + 7*24*60*60*1000);
+    const time = "expires="+ date.toUTCString();
+    document.cookie = name + "=" + value + ";" + time + ";";
+};
+
+Cookies.get = function(name, default_value = null) {
+    name = name + "=";
+    const decoded_cookie = decodeURIComponent(document.cookie);
+    const parts = decoded_cookie.split(';');
+    for(let i = 0; i < parts.length; i++) {
+        const part = parts[i].trim();
+        if (part.indexOf(name) === 0)
+            return part.substring(name.length, part.length);
+    }
+    return default_value;
+};
 
 /* ***** BUTTON ACTIONS ***** */
 
@@ -369,19 +395,65 @@ Api.ec_request = (request, success) => {
     });
 };
 
-Api.password = "change_me_now";
+Api.password = Cookies.get("api_password", "change_me_now");
+Api.address = Cookies.get("api_address", "http://localhost:2187");
 
 Api.ajax = (path, data, success) => {
     data['password'] = Api.password;
     $.ajax({
-        url: "http://localhost:2187/" + path,
+        url: Api.address + "/" + path,
         method: "POST",
         data: Api.serialize_post_data(data),
         dataType: "json",
         success: success,
         error: (error) => {
-            console.log(error.status);
-            Gui.handle_error(error['status'] === 0 ? "Could not reach your Ict node. Is it running with API enabled on port 2187?" : JSON.stringify(error));
+            console.log(error);
+            if(error['status'] === 0) {
+                Api.connection_failed(path, data, success);
+            } else {
+                Gui.handle_error(JSON.stringify(error));
+            }
+        }
+    })
+};
+
+Api.connection_failed = function (path, data, success) {
+    Swal.mixin({
+        confirmButtonText: 'Proceed',
+        progressSteps: ['1', '2', '3']
+    }).queue([
+        {
+            title: 'Could not connect to Ict',
+            text: 'We had some trouble connecting to your Ict node. Make sure it is running and try again. Check your browser console and your Ict log for errors.',
+            confirmButtonText: 'Retry'
+        },
+        {
+            html: 'Please enter the API address of your Ict node. You can find it in your ict.cfg file. Usually it\'s <code>http://localhost:2187</code>. Make sure your Ict is running.',
+            input: 'text',
+            inputValue: Cookies.get("api_address"),
+            inputPlaceholder: 'api address (http://host:port)',
+
+            preConfirm: function (address) {
+                if (!address.match(/^http(s)?:\/\/[a-z0-9_\-.]+:\d{1,5}$/g)) {
+                    alert("Address does not match expected format 'http://host:port'!");
+                    return false;
+                }
+            },
+        },
+        {
+            html: 'Please enter your API/GUI password. You can find it in your ict.cfg file. The default value is <code>change_me_now</code>.',
+            input: 'password',
+            inputValue: Cookies.get("api_password"),
+            inputPlaceholder: 'api password',
+            confirmButtonText: 'Retry'
+        },
+    ]).then((result) => {
+        if (result.value) {
+            Api.address = result.value[1];
+            Api.password = result.value[2];
+            Cookies.set("api_address", Api.address);
+            Cookies.set("api_password", Api.password);
+            Api.ajax(path, data, success);
         }
     })
 };
@@ -396,70 +468,72 @@ Api.serialize_post_data = (data) => {
 
 // ***** D3 *****
 
-    Graph.load_graph = function(graph) {
+// from https://bl.ocks.org/heybignick/3faf257bbbbc7743bb72310d03b86ee8 (modified)
 
-        $("#tangle svg").html("");
+Graph.load_graph = function(graph) {
 
-        const svg = d3.select("svg"),
-            width = +svg.attr("width"),
-            height = +svg.attr("height");
+    $("#tangle svg").html("");
 
-        const color = [
-            "#DDDDDD",
-            "#FF0044", // output
-            "#BBBBBB", // zero value
-            "#00BB88" // input
-        ];
+    const svg = d3.select("svg"),
+        width = +svg.attr("width"),
+        height = +svg.attr("height");
 
-        const simulation = d3.forceSimulation()
-            .force("link", d3.forceLink().distance(function(d) {return d.distance;}).id(function(d) { return d.id; }))
-            .force("charge", d3.forceManyBody())
-            .force("center", d3.forceCenter(width / 2, height / 2));
+    const color = [
+        "#DDDDDD",
+        "#FF0044", // output
+        "#BBBBBB", // zero value
+        "#00BB88" // input
+    ];
 
-        const link = svg.append("g")
-            .attr("class", "links")
-            .selectAll("line")
-            .data(graph.links)
-            .enter().append("line")
-            .attr("stroke-width", function(d) { return Math.sqrt(d.value); });
+    const simulation = d3.forceSimulation()
+        .force("link", d3.forceLink().distance(function(d) {return d.distance;}).id(function(d) { return d.id; }))
+        .force("charge", d3.forceManyBody())
+        .force("center", d3.forceCenter(width / 2, height / 2));
 
-        const node = svg.append("g")
-            .attr("class", "nodes")
-            .selectAll("g")
-            .data(graph.nodes)
-            .enter().append("g");
+    const link = svg.append("g")
+        .attr("class", "links")
+        .selectAll("line")
+        .data(graph.links)
+        .enter().append("line")
+        .attr("stroke-width", function(d) { return Math.sqrt(d.value); });
 
-        const circles = node.append("circle")
-            .attr("r", 10)
-            .attr("fill", function(d) { return color[d.group]; });
+    const node = svg.append("g")
+        .attr("class", "nodes")
+        .selectAll("g")
+        .data(graph.nodes)
+        .enter().append("g");
 
-        const lables = node.append("text")
-            .text(function(d) {
-                return d.id;
+    const circles = node.append("circle")
+        .attr("r", 10)
+        .attr("fill", function(d) { return color[d.group]; });
+
+    const lables = node.append("text")
+        .text(function(d) {
+            return d.id;
+        })
+        .attr('x', 10)
+        .attr('y', 10);
+
+    node.append("title")
+        .text(function(d) { return d.id + ""; });
+
+    simulation
+        .nodes(graph.nodes)
+        .on("tick", ticked);
+
+    simulation.force("link")
+        .links(graph.links);
+
+    function ticked() {
+        link
+            .attr("x1", function(d) { return d.source.x; })
+            .attr("y1", function(d) { return d.source.y; })
+            .attr("x2", function(d) { return d.target.x; })
+            .attr("y2", function(d) { return d.target.y; });
+
+        node
+            .attr("transform", function(d) {
+                return "translate(" + d.x + "," + d.y + ")";
             })
-            .attr('x', 10)
-            .attr('y', 10);
-
-        node.append("title")
-            .text(function(d) { return d.id + ""; });
-
-        simulation
-            .nodes(graph.nodes)
-            .on("tick", ticked);
-
-        simulation.force("link")
-            .links(graph.links);
-
-        function ticked() {
-            link
-                .attr("x1", function(d) { return d.source.x; })
-                .attr("y1", function(d) { return d.source.y; })
-                .attr("x2", function(d) { return d.target.x; })
-                .attr("y2", function(d) { return d.target.y; });
-
-            node
-                .attr("transform", function(d) {
-                    return "translate(" + d.x + "," + d.y + ")";
-                })
-        }
-    };
+    }
+};
