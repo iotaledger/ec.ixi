@@ -21,7 +21,7 @@ public class AutonomousEconomicActorTest extends IctTestTemplate {
         Ict ict = createIct();
         EconomicCluster cluster = new EconomicCluster(ict);
 
-        AutonomousEconomicActor underTest = new AutonomousEconomicActor(ict, cluster, new HashMap<String, BigInteger>(), randomMerkleTree(3));
+        AutonomousEconomicActor underTest = new AutonomousEconomicActor(ict, cluster, new HashMap<>(), randomMerkleTree(3));
         ControlledEconomicActor otherA = new ControlledEconomicActor(randomMerkleTree(3));
         ControlledEconomicActor otherB = new ControlledEconomicActor(randomMerkleTree(3));
 
