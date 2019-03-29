@@ -7,9 +7,13 @@ import org.iota.ict.model.transaction.Transaction;
 import org.iota.ict.utils.crypto.AutoIndexedMerkleTree;
 
 import java.math.BigInteger;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.*;
 
 public class AutonomousEconomicActor extends ControlledEconomicActor {
+
+    private static final NumberFormat format = new DecimalFormat("#0.000");
 
     private final Ixi ixi;
     private final LedgerValidator ledgerValidator;
@@ -47,8 +51,10 @@ public class AutonomousEconomicActor extends ControlledEconomicActor {
         List<String> tangles = new LinkedList<>(economicCluster.getAllTangles());
         tangles.addAll(newTangles);
         removeInvalidTangles(tangles);
-        ConfidenceCalculator confidenceCalculator = createConfidenceCalculator(tangles);
         Map<String, Double> newConfidenceByTangle = new HashMap<>();
+        if(tangles.size() == 0)
+            return;
+        ConfidenceCalculator confidenceCalculator = createConfidenceCalculator(tangles);
         for(String tangle : tangles) {
             double calculatedConfidence = confidenceCalculator.confidenceOf(tangle);
             newConfidenceByTangle.put(tangle, calculatedConfidence);
@@ -120,18 +126,21 @@ public class AutonomousEconomicActor extends ControlledEconomicActor {
     }
 
     protected void adjustConfidence(String tangle, double newConfidence) {
-        System.err.println("adjusting confidence for " + tangle + " towards " + newConfidence);
         double oldConfidence = publishedConfidenceByMarkedTangle.getOrDefault(tangle, new Double(0));
         boolean shouldIssueNewMarker = !publishedConfidenceByMarkedTangle.containsKey(tangle) || shouldIssueMarkerToUpdateConfidence(oldConfidence, newConfidence);
         if(shouldIssueNewMarker) {
             double conservativeConfidence = oldConfidence + (newConfidence - oldConfidence) / conservativity;
-            publishedConfidenceByMarkedTangle.put(tangle, conservativeConfidence);
-            String trunk = tangle.substring(0, 81);
-            String branch = tangle.substring(81);
-            Bundle marker = buildMarker(trunk, branch, conservativeConfidence);
+            System.err.println("adjusting confidence for " + tangle.substring(0, 10) + "... towards " + format.format(newConfidence) + ": "+format.format(oldConfidence)+" -> " + format.format(conservativeConfidence));
+            Bundle marker = buildMarker(tangle.substring(0, 81), tangle.substring(81), conservativeConfidence);
             for (Transaction t : marker.getTransactions())
                 ixi.submit(t);
         }
+    }
+
+    @Override
+    public Bundle buildMarker(String trunk, String branch, double confidence) {
+        publishedConfidenceByMarkedTangle.put(tangleID(trunk, branch), confidence);
+        return super.buildMarker(trunk, branch, confidence);
     }
 
     private static boolean shouldIssueMarkerToUpdateConfidence(double currentConfidence, double newConfidence) {
