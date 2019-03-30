@@ -32,19 +32,19 @@ When clicking on **status**, the confidence for each transaction should be `0`.
 In **Actors**, click on the **issue** button of your actor. Enter the hash displayed in your **Transfer** section into the **reference #1* field and click on **issue**.
 <img src="https://raw.githubusercontent.com/iotaledger/ec.ixi/master/docs/assets/tut4_issue_marker.PNG" />
 
-- When clicking on the **markers** button of the same actor under **Cluster**, you should now see one entry with a confidence of something like `0.05`.
+When clicking on the **markers** button of the same actor under **Cluster**, you should now see one entry with a confidence of something like `0.05`.
 <img src="https://raw.githubusercontent.com/iotaledger/ec.ixi/master/docs/assets/tut3_issue_transfer4.PNG" />
 
-- Click on the **status** button of the transfer in **Transfers**, the confidence should now be positive. When going on **details**, you should see one entry with `0.05`.
+Click on the **status** button of the transfer in **Transfers**, the confidence should now be positive. When going on **details**, you should see one entry with `0.05`.
 <img src="https://raw.githubusercontent.com/iotaledger/ec.ixi/master/docs/assets/tut4_issue_marker2.PNG" />
 
-- Keep clicking the **tick** button of actors controlled by you. This should slowly let the confidence converge towards 1.
+Keep clicking the **tick** button of actors controlled by you. This should slowly let the confidence converge towards 1.
 <img src="https://raw.githubusercontent.com/iotaledger/ec.ixi/master/docs/assets/tut5_tick.PNG" />.
 <img src="https://raw.githubusercontent.com/iotaledger/ec.ixi/master/docs/assets/tut5_tick2.PNG" />.
 <img src="https://raw.githubusercontent.com/iotaledger/ec.ixi/master/docs/assets/tut5_tick3.PNG" />.
 
 ## Issuing a Double-Spend
 
-- From section **Cluster** change the balance of one of your addresses A by creating tokens.
-- In your **wallet** send a transfer spending all tokens from A to another address B.
-- Send a second transfer from A to a third address C. You can do this even after the first transfer confirmed by disabling "check for available balance".
+* From section **Cluster** change the balance of one of your addresses A by creating tokens.
+* In your **wallet** send a transfer spending all tokens from A to another address B.
+* Send a second transfer from A to a third address C. You can do this even after the first transfer confirmed by disabling "check for available balance".
