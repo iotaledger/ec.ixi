@@ -33,7 +33,7 @@ In **Actors**, click on the **issue** button of your actor. Enter the hash displ
 <img src="https://raw.githubusercontent.com/iotaledger/ec.ixi/master/docs/assets/tut4_issue_marker.PNG" />
 
 When clicking on the **markers** button of the same actor under **Cluster**, you should now see one entry with a confidence of something like `0.05`.
-<img src="https://raw.githubusercontent.com/iotaledger/ec.ixi/master/docs/assets/tut3_issue_transfer4.PNG" />
+<img src="https://raw.githubusercontent.com/iotaledger/ec.ixi/master/docs/assets/tut4_issue_marker3.PNG" />
 
 Click on the **status** button of the transfer in **Transfers**, the confidence should now be positive. When going on **details**, you should see one entry with `0.05`.
 <img src="https://raw.githubusercontent.com/iotaledger/ec.ixi/master/docs/assets/tut4_issue_marker2.PNG" />

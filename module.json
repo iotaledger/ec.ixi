@@ -2,8 +2,8 @@
   "version": "1.0",
   "name": "EC.ixi",
   "main_class": "org.iota.ec.ECModule",
-  "description": "Economic Clustering brings consensus to Ict.",
+  "description": "Economic Clustering (EC) is the consensus mechanism in the Ict network. This allows you to come to consensus with others on the confirmation state of transactions.",
   "repository": "iotaledger/ec.ixi",
   "gui_port": 0,
-  "supported_versions": ["0.6-SNAPSHOT"]
+  "supported_versions": ["0.6"]
 }

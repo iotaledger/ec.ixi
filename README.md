@@ -1,5 +1,7 @@
 # EC.ixi
 
+<img src="https://raw.githubusercontent.com/iotaledger/ec.ixi/master/docs/assets/gui.png" />
+
 ## About
 
 **Economic Clustering (EC)** is the consensus mechanism in the Ict network. For a more detailed description of the
