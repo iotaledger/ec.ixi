@@ -39,9 +39,9 @@ Click on the **status** button of the transfer in **Transfers**, the confidence 
 <img src="https://raw.githubusercontent.com/iotaledger/ec.ixi/master/docs/assets/tut4_issue_marker2.PNG" />
 
 Keep clicking the **tick** button of actors controlled by you. This should slowly let the confidence converge towards 1.
-<img src="https://raw.githubusercontent.com/iotaledger/ec.ixi/master/docs/assets/tut5_tick.PNG" />.
-<img src="https://raw.githubusercontent.com/iotaledger/ec.ixi/master/docs/assets/tut5_tick2.PNG" />.
-<img src="https://raw.githubusercontent.com/iotaledger/ec.ixi/master/docs/assets/tut5_tick3.PNG" />.
+<img src="https://raw.githubusercontent.com/iotaledger/ec.ixi/master/docs/assets/tut5_tick.PNG" />
+<img src="https://raw.githubusercontent.com/iotaledger/ec.ixi/master/docs/assets/tut5_tick2.PNG" />
+<img src="https://raw.githubusercontent.com/iotaledger/ec.ixi/master/docs/assets/tut5_tick3.PNG" />
 
 ## Issuing a Double-Spend
 
