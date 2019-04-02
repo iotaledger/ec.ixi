@@ -46,7 +46,7 @@
             <p class="info">You can adjust the initial balance of an address here. If your cluster contains actors you do not control, make sure their owners adjust the balance as well.</p>
             <form id="change_balance">
                 <input type="text" placeholder="address" id="change_balance_address" pattern="^[A-Z9]{30,81}$">
-                <input type="number" placeholder="to add" id="change_balance_to_add" pattern="^[0-9]+$" step="1" min="-2800000000000000" max="2800000000000000">
+                <input type="number" placeholder="to add" id="change_balance_to_add" pattern="^-?\d+$" step="1" min="-2800000000000000" max="2800000000000000">
                 <input type="button" value="change balance" onclick="Btn.change_balance();">
             </form>
         </div>
