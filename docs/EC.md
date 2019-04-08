@@ -38,26 +38,6 @@ We care directly if we depend on this actor. The value of our tokens only result
 
 We care indirectly if an actor who is relevant to us heavily relies on another actor. For example, we might not plan to interact with the bank of our supermarket ourselves. However, that bank is certainly relevant to our supermarket and as such it is relevant to us as well, even though in a smaller degree.
 
-### Neighbor Clusters
-
-> Each cluster processes its own transactions and transactions of the neighbor clusters, all the other transactions are ignored because they simply don’t reach the cluster.
-
-(to be continued ...)
-
-# Economics of EC
-
-## Inter-Cluster Token Exchange
-
-Clusters are not compatible. However, just like in the real world where we have currency exchanges, nodes who have balances in both clusters can offer an exchange service between clusters. This service would (like the real-world equivalent) of course require a tiny fee to compensate the serving node.
-
-Even though this service is provided by a third-party, practically no trust is required when realizing transacting through flash. A tiny micro-payment stream will flow between both nodes in both clusters. If the exchanging node turned out to be malicious and would not transfer the balance to the other cluster but keep it, only an insignificantly low amount of tokens would have been stolen.
-
-## Token Creation
-
-Clusters are equivalent to ledger forks. As such, there is no mechanism preventing someone from creating a new cluster with new tokens. Instead, Economic Clustering relies on economic laws to ensure that there is no damage caused by someone creating tokens out of thin air - which is possible at any time through forking anyways.
-
-Although tokens can be created out of thin air, value cannot. The value of a cluster lies in its economic relevance. A cluster without relevance will have no value and therefore the tokens will have no value either. Funds in economic clusters will therefore closely resemble those of the real world. There is no way to avoid this, neither is there any use in doing so.
-
 # Implementation
 
 ## Terminology
@@ -132,6 +112,28 @@ Further, economic actors which are topologically nearby will have a lot of this 
 To increase the chance of a transaction confirming in a cluster, the issuing node tries to place it so that it will likely be referenced by many actors in that cluster. It seeks for a spot in the Tangle that is most representative of the cluster.  Due to the fuzzy nature of clusters, this is not a binary problem (is it representative?) but a probabilistic (how representative?). The most representative place for a cluster defined by a set of markers is the cut of their future cones. That is because that cut has the highest overlap with the local Tangle of all actors in the cluster.
 
 As outlined in the IOTA whitepaper<sup>2</sup>, IOTA specifies a random walk on the Tangle as the reference method to select tips. Based on the assumption that most transactions will be using this method, it makes sense for any entity to comply, resulting in a fair and stable tip selection. Therefore we conclude that nodes will want to use a random walk to place their transactions into the mentioned future cut. This can be achieved by weighting the edges during the *Markov chain Monte Carlo* (MCMC) random walk based on the clustermrepresentativeness of the transactions they are leading to.<sup>3</sup>
+
+### Inter-Cluster Exchange
+
+Imagine two rather separate but not too distant clusters C<sub>X</sup> and C<sub>Y</sub>. They might have a small overlap of 5% for example and be considered neighbors. A node can transfer value from C<sub>X</sup> to C<sub>Y</sub> by submitting a transfer to a place that is representative in both clusters. Remember that clusters are fuzzy. These two clusters can be considered one single large cluster  C<sub>XY</sub>. Therefore the node can apply the previously decribed tip selection to issue a transfer into the future cut of both clusters from where it can be referenced by the cluster C<sub>XY</sub> and therefore in fact by both clusters C<sub>X</sub> and  C<sub>Y</sub>.
+
+We assume that the funds spent by the transfer are only known in C<sub>X</sub> but not in C<sub>Y</sub> (otherwise it wouldn't be an inter-cluster exchange). Now because the balances do exist in C<sub>X</sub>, the transfer can confirm in C<sub>X</sub>. Be aware that the boundaries of C<sub>X</sub> and C<sub>Y</sub> are fuzzy meaning that the transfer will also partially confirm in C<sub>Y</sub>.
+
+The confidence of that transfer in C<sub>Y</sub> represents the probability of that transfer to confirm in that cluster - which will happen if more markers in C<sub>Y</sub> reference that transactions until it becomes part of the past cut in C<sub>Y</sub> and therefore part of C<sub>Y</sub> itself.
+
+The less distant C<sub>X</sub> and C<sub>Y</sub> are:
+* the higher is their overlap (larger future cut)
+* the easier it is to insert a transfer that will be picked up in both clusters
+* the higher the correlation of the transfer's confidences in both clusters
+* the more likely is the inter-cluster exchange to be successful
+
+This means that it is possible to transfer value between two adjasent clusers. If one wanted to transact to a distant cluster, one would have to hop over multiple intermediate clusters. The cost of doing this physically is proportional to the transfer distance. It manifests itself as the time required to perform all hops as well as the computational resources spent on attaching the transfer (tip selection and proof-of-work).
+
+### Exchange Nodes
+
+We assume that this cost will create an economical demand for exchange services which offer a virtual inter-cluster exchange as a service for a fee to monetarily cover these time and resource expenses. Note that this cost is not a technical part of the protocol, which will remain feeless, but compensates the exchanging node for the cost of providing the service.
+
+Entities who have balances in distant clusters can offer an exchange service between these. Even though this service is provided by a third-party, practically no trust is required when realizing transacting through Flash Channels. A tiny micro-payment stream will flow from the sender to the service in the source cluster, another from the service to the receiver in the target cluster. If the exchanging node turned out to be malicious and would not transfer the balance to the other cluster but keep it, only an insignificantly low amount of tokens would have been stolen due to the time-continuous nature of Flash Channels.
 
 ### Consensus
 
@@ -213,3 +215,4 @@ from validating the entire ledger since genesis to validating only the new part 
 * <sup>1</sup> ... [Economic Clustering and IOTA](https://medium.com/@comefrombeyond/economic-clustering-and-iota-d3a77388900) (Medium Article) by Come-from-Beyond on Jun 9, 2018
 * <sup>2</sup> ... [The Tangle](https://assets.ctfassets.net/r1dr6vzfxhev/2t4uxvsIqk0EUau6g2sw0g/45eae33637ca92f85dd9f4a3a218e1ec/iota1_4_3.pdf) (IOTA Whitepaper) by Prof. Serguei Popov on Apr 30, 2018
 * <sup>3</sup> ... [A scoop of tangle](https://www.twitch.tv/videos/394080103) (Twitch Video) by Paul Douglas on Mar 11, 2019
+* <sup>4</sup> ... [Instant & Feeless - Flash Channels](https://blog.iota.org/instant-feeless-flash-channels-88572d9a4385) (Medium Post) by Lewis Freiberg on Sep 24, 2017
