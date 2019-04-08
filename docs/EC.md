@@ -6,6 +6,10 @@
 
 In DLT each node usually processes and stores a local copy of the entire ledger. Due to their global nature and increasing adoption, this approach will necessarily run into scaling issues. While memory is cheap, bandwidth and latency are the first expected to cause issues. Economic Clustering offers infinite scalability for the entire system while keeping the requirements for individual nodes low by splitting the global ledger into economically relevant clusters. The concept is backed by economic laws.
 
+# Motivation
+
+It is historically reasoned that in the real world economic factors outweight the Longest Chain Rule when it comes to DLT. Therefore it appears necessary to extend the purely technical formal model of consensus with economic incentives. While the Cumulative Weight Consensus Mechanism outlined in the IOTA whitepaper (<sup>2</sup>) does provide a mathematically backed model for consensus on the Tangle, it does not provide a strategy to solve conflicts with economic behaviour. Economic Clustering will complement the formal mechanism with such a strategy. It is expected that both mechanisms will be applied in parallel and both of their relative relevances will sum up to 100%.
+
 # Introduction
 
 ### Scalability in Real World Economics
@@ -188,4 +192,5 @@ from validating the entire ledger since genesis to validating only the new part 
 
 # References
 
-* [Economic Clustering and IOTA](https://medium.com/@comefrombeyond/economic-clustering-and-iota-d3a77388900) (Medium Article) by Come-from-Beyond on Jun 9, 2018
+* <sup>1</sup> ... [Economic Clustering and IOTA](https://medium.com/@comefrombeyond/economic-clustering-and-iota-d3a77388900) (Medium Article) by Come-from-Beyond on Jun 9, 2018
+* <sup>2</sup> ... [The Tangle](https://assets.ctfassets.net/r1dr6vzfxhev/2t4uxvsIqk0EUau6g2sw0g/45eae33637ca92f85dd9f4a3a218e1ec/iota1_4_3.pdf) by Prof. Serguei Popov on Apr 30, 2018
