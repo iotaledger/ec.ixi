@@ -8,7 +8,7 @@ In DLT each node usually processes and stores a local copy of the entire ledger.
 
 # Motivation
 
-It is historically reasoned that in the real world economic factors outweight the Longest Chain Rule when it comes to DLT. Therefore it appears necessary to extend the purely technical formal model of consensus with economic incentives. While the Cumulative Weight Consensus Mechanism outlined in the IOTA whitepaper (<sup>2</sup>) does provide a mathematically backed model for consensus on the Tangle, it does not provide a strategy to solve conflicts with economic behaviour. Economic Clustering will complement the formal mechanism with such a strategy. It is expected that both mechanisms will be applied in parallel and both of their relative relevances will sum up to 100%.
+It is historically reasoned that in the real world economic factors outweight the Longest Chain Rule when it comes to DLT. Therefore it appears necessary to extend the purely technical formal model of consensus with economic incentives. While the Cumulative Weight Consensus Mechanism outlined in the IOTA whitepaper<sup>2</sup> does provide a mathematically backed model for consensus on the Tangle, it does not provide a strategy to solve conflicts with economic behaviour. Economic Clustering will complement the formal mechanism with such a strategy. It is expected that both mechanisms will be applied in parallel and both of their relative relevances will sum up to 100%.
 
 # Introduction
 
@@ -115,6 +115,24 @@ referenced(M) = referenced(M.tail)
               = span(M.tail.branch) ⋃ span(M.tail.trunk)
 ```
 
+### Markers Define Double Cones
+
+Each marker can be described by a double cone<sup>3</sup> where the marker is the apex and both the past and the future of the marker span up the cones. The past consists of all transactions referenced by the marker while the future contains all transactions referencing the marker. This offers a unique view of the Tangle that only considers a subset of logically linked transactions.
+
+Note that while the Tangle is theoretically infinite, each node can only process a certain amount of transactions. Therefore both cones of the marker will be limited to a certain depth. While the depth (or rather height) of the future is already limited due to our inability to see into the future, the depth of the past will be defined by technical limitations.
+
+### Cones define Clusters
+
+Following a cluster happens implicitly through its neighbors. Each node is aware of a certain set of markers. The union of all double cones of the markers in this set offers a unique view of the tangle - the **local tangle**. Each node actively requests and broadcasts transactions in this local tangle to improve its view. Transactions that are not part of the local tangle will not be broadcasted to neighbors. As a result, the local tangles of neighbors will have a strong overlap. When a new marker issued by a trusted entity is discovered in the local tangle, the local tangle will adjust dynamically to include that markers double cone.
+
+Further, economic actors which are topologically nearby will have a lot of this overlap. A transaction in the cut of the past cones of markers issued by different economic actors will be referenced by each of these actors and thus will have a higher acceptance in the cluster. **It is important to note that this makes clusters fuzzy**: there is no clear logical boundary between two clusters. Clusters can overlap to any degree. A cluster's boundary must always be seen from a probabilistic point of view, analogous to wave functions in quantum physics.
+
+### Tip Selection
+
+To increase the chance of a transaction confirming in a cluster, the issuing node tries to place it so that it will likely be referenced by many actors in that cluster. It seeks for a spot in the Tangle that is most representative of the cluster.  Due to the fuzzy nature of clusters, this is not a binary problem (is it representative?) but a probabilistic (how representative?). The most representative place for a cluster defined by a set of markers is the cut of their future cones. That is because that cut has the highest overlap with the local Tangle of all actors in the cluster.
+
+As outlined in the IOTA whitepaper<sup>2</sup>, IOTA specifies a random walk on the Tangle as the reference method to select tips. Based on the assumption that most transactions will be using this method, it makes sense for any entity to comply, resulting in a fair and stable tip selection. Therefore we conclude that nodes will want to use a random walk to place their transactions into the mentioned future cut. This can be achieved by weighting the edges during the *Markov chain Monte Carlo* (MCMC) random walk based on the clustermrepresentativeness of the transactions they are leading to.<sup>3</sup>
+
 ### Consensus
 
 Economic actors publish such markers and adjust the probabilities depending on the markers issued by other actors within their cluster. This dynamic and probabilistic voting process goes on until the cluster comes to consensus. This happens when the vast economically relevant majority of the cluster approves a certain sub-tangle with 100% confidence each. In case a conflicting sub-tangle was previously marked with a non-zero confidence, the respective actor would overwrite that confidence with 0% because it is not compatible with the accepted sub-tangle and no longer likely to be accepted by the cluster.
@@ -193,4 +211,5 @@ from validating the entire ledger since genesis to validating only the new part 
 # References
 
 * <sup>1</sup> ... [Economic Clustering and IOTA](https://medium.com/@comefrombeyond/economic-clustering-and-iota-d3a77388900) (Medium Article) by Come-from-Beyond on Jun 9, 2018
-* <sup>2</sup> ... [The Tangle](https://assets.ctfassets.net/r1dr6vzfxhev/2t4uxvsIqk0EUau6g2sw0g/45eae33637ca92f85dd9f4a3a218e1ec/iota1_4_3.pdf) by Prof. Serguei Popov on Apr 30, 2018
+* <sup>2</sup> ... [The Tangle](https://assets.ctfassets.net/r1dr6vzfxhev/2t4uxvsIqk0EUau6g2sw0g/45eae33637ca92f85dd9f4a3a218e1ec/iota1_4_3.pdf) (IOTA Whitepaper) by Prof. Serguei Popov on Apr 30, 2018
+* <sup>3</sup> ... [A scoop of tangle](https://www.twitch.tv/videos/394080103) (Twitch Video) by Paul Douglas on Mar 11, 2019
