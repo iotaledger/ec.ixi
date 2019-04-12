@@ -101,11 +101,15 @@ Each marker can be described by a double cone<sup>3</sup> where the marker is th
 
 Note that while the Tangle is theoretically infinite, each node can only process a certain amount of transactions. Therefore both cones of the marker will be limited to a certain depth. While the depth (or rather height) of the future is already limited due to our inability to see into the future, the depth of the past will be defined by technical limitations.
 
+<img src="https://raw.githubusercontent.com/iotaledger/ec.ixi/master/docs/assets/cone.png" width="300px" />
+
 ### Cones define Clusters
 
 Following a cluster happens implicitly through its neighbors. Each node is aware of a certain set of markers. The union of all double cones of the markers in this set offers a unique view of the tangle - the **local tangle**. Each node actively requests and broadcasts transactions in this local tangle to improve its view. Transactions that are not part of the local tangle will not be broadcasted to neighbors. As a result, the local tangles of neighbors will have a strong overlap. When a new marker issued by a trusted entity is discovered in the local tangle, the local tangle will adjust dynamically to include that markers double cone.
 
 Further, economic actors which are topologically nearby will have a lot of this overlap. A transaction in the cut of the past cones of markers issued by different economic actors will be referenced by each of these actors and thus will have a higher acceptance in the cluster. **It is important to note that this makes clusters fuzzy**: there is no clear logical boundary between two clusters. Clusters can overlap to any degree. A cluster's boundary must always be seen from a probabilistic point of view, analogous to wave functions in quantum physics.
+
+<img src="https://raw.githubusercontent.com/iotaledger/ec.ixi/master/docs/assets/cone_cut.png" width="200px" />
 
 ### Tip Selection
 
@@ -134,6 +138,10 @@ This means that it is possible to transfer value between two adjasent clusers. I
 We assume that this cost will create an economical demand for exchange services which offer a virtual inter-cluster exchange as a service for a fee to monetarily cover these time and resource expenses. Note that this cost is not a technical part of the protocol, which will remain feeless, but compensates the exchanging node for the cost of providing the service.
 
 Entities who have balances in distant clusters can offer an exchange service between these. Even though this service is provided by a third-party, practically no trust is required when realizing transacting through Flash Channels. A tiny micro-payment stream will flow from the sender to the service in the source cluster, another from the service to the receiver in the target cluster. If the exchanging node turned out to be malicious and would not transfer the balance to the other cluster but keep it, only an insignificantly low amount of tokens would have been stolen due to the time-continuous nature of Flash Channels.
+
+### Pruning
+
+Despite the fact that economic actors will only store the Tangle to a certain depth, they can validate balances based on known transactions which are already confirmed by the cluster. These transactions are at the bottom of the past cone. If the input balances of a transfer cannot be found in that past cone, the actor will depend on other actors in that cluster. Only if a sufficient amount of these can remember the input balances, will the actor assume that these balances do indeed exist. This means that balances will be lost if they are not moved within a reasonable amount of time. The exact time depends on the activity in the cluster and the memory resources of the actors therein. Clusters where balances are used as store of value (e.g. cluster-0) will provide a higher time frame before transactions are forgotten. On the other hand, local IoT ecosystems might assume that members actively utilize their balances and work with less value, therefore it is reasonable to use a lower timeframe that allows edge devices despite their constrains to participate as economic actors.
 
 ### Consensus
 
