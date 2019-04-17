@@ -40,6 +40,8 @@ We care indirectly if an actor who is relevant to us heavily relies on another a
 
 # Implementation
 
+<img src="https://raw.githubusercontent.com/iotaledger/ec.ixi/master/docs/assets/classes.png" width="300px" />
+
 ## Terminology
 
 ### Span-Tangle
