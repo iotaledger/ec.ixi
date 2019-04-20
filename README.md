@@ -5,7 +5,7 @@
 ## About
 
 **Economic Clustering (EC)** is the consensus mechanism in the Ict network. For a more detailed description of the
-mechanism, please see [this document](https://github.com/iotaledger/ict/blob/master/docs/EC.md). EC is not part of
+mechanism, please see [this document](https://github.com/iotaledger/ec.ixi/blob/master/docs/EC.md). EC is not part of
 the Ict core protocol but an optional extension. In this repoistory EC has been implemented as an [IXI](https://github.com/iotaledger/ixi)
 module which you can install on your Ict node to extend it with the consensus mechanism. This allows you to come to
 consensus with others on the confirmation state of transactions.
