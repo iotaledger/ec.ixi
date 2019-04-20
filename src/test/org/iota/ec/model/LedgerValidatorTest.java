@@ -35,7 +35,7 @@ public class LedgerValidatorTest extends IctTestTemplate {
         saveSleep(50);
 
         try {
-            validator.isTangleValid(transaction1.hash);
+            validator.validateTangle(transaction1.hash);
             Assert.fail("No exception thrown despite incomplete Tangle.");
         } catch (LedgerValidator.IncompleteTangleException incompleteTangleException) {
             Assert.assertEquals("Wrong transaction reported as missing.", transaction1.hash, incompleteTangleException.unavailableTransactionHash);

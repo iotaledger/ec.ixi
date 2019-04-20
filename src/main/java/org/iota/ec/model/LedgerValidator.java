@@ -1,7 +1,6 @@
 package org.iota.ec.model;
 
 import org.iota.ict.ixi.Ixi;
-import org.iota.ict.model.bc.BalanceChange;
 import org.iota.ict.model.bundle.Bundle;
 import org.iota.ict.model.transaction.Transaction;
 import org.iota.ict.model.transaction.TransactionBuilder;
@@ -16,7 +15,8 @@ public class LedgerValidator {
 
     protected final Map<String, BigInteger> initialBalances;
     protected final Map<String, String> dependencyByTransfer = new HashMap<>();
-    protected final Set<String> invalidTransfers = new HashSet<>(), validTransfers = new HashSet<>();
+    protected final Map<String, RuntimeException> invalidTransfers = new HashMap<>();
+    protected final Set<String> validTransfers = new HashSet<>();
 
     LedgerValidator(Ixi ixi) {
         this.ixi = ixi;
@@ -65,18 +65,16 @@ public class LedgerValidator {
     }
 
     protected boolean isTangleSolid(Transaction root) {
-        try {
-            return isTangleValid(root.hash, root) && noNegativeBalanceInTangle(root);
-        } catch (IncompleteTangleException e) {
-            return false;
-        }
+        return isTangleValid(root) && noNegativeBalanceInTangle(root);
     }
 
     protected boolean noNegativeBalanceInTangle(Transaction root) {
         Map<String, BigInteger> balances = calcBalances(root);
         for (Map.Entry<String, BigInteger> entry : balances.entrySet()) {
-            if(entry.getValue().compareTo(BigInteger.ZERO) < 0)
-                return false;}
+            if(entry.getValue().compareTo(BigInteger.ZERO) < 0) {
+                return false;
+            }
+        }
         return true;
     }
 
@@ -109,27 +107,59 @@ public class LedgerValidator {
     }
 
     public boolean isTangleValid(String rootHash) {
-        return isTangleValid(rootHash, ixi.findTransactionByHash(rootHash));
+        return isTangleValid(ixi.findTransactionByHash(rootHash));
     }
 
-    protected boolean isTangleValid(String rootHash, Transaction root) {
+    protected boolean isTangleValid(Transaction root) {
+
+        if(root == null)
+            throw new NullPointerException("root is null");
+
+        try {
+            validateTangle(root.hash, root);
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    protected void validateTangle(String rootHash) {
+        validateTangle(rootHash, ixi.findTransactionByHash(rootHash));
+    }
+
+    protected void validateTangle(String rootHash, Transaction root) {
+
         if(root == null)
             throw new IncompleteTangleException(rootHash);
-        if(validTransfers.contains(root.hash))
-            return true;
-        if(invalidTransfers.contains(root.hash))
-            return false;
+        if(validTransfers.contains(rootHash))
+            return;
+        RuntimeException exception = invalidTransfers.get(rootHash);
+        if(exception != null)
+            throw exception;
+
         checkForMissingDependency(root.hash);
-        return validateTangle(root);
+        try {
+            if (root.isBundleHead && !(root.isBundleTail && root.value.compareTo(BigInteger.ZERO) == 0)) {
+                validateTransfer(root);
+            }
+            validateTangle(root.branchHash(), root.getBranch());
+            validateTangle(root.trunkHash(), root.getTrunk());
+            validTransfers.add(root.hash);
+        } catch (IncompleteTangleException incompleteTangleException) {
+            dependencyByTransfer.put(root.hash, incompleteTangleException.unavailableTransactionHash);
+            throw incompleteTangleException;
+        } catch (RuntimeException e) {
+            invalidTransfers.put(root.hash, e);
+            throw e;
+        }
     }
 
-    protected boolean validateTangle(Transaction root) {
-        boolean isValid = (!root.isBundleHead || (root.isBundleTail && root.value.compareTo(BigInteger.ZERO) == 0))
-                ? isTangleValid(root.branchHash(), root.getBranch()) && isTangleValid(root.trunkHash(), root.getTrunk())
-                : isBundleValid(root);
-        (isValid ? validTransfers : invalidTransfers).add(root.hash);
-
-        return isValid;
+    protected void validateTransfer(Transaction head) {
+        Transfer transfer = new Transfer(new Bundle(head));
+        if(!transfer.isValid()) {
+            throw new InvalidTransferException(head.hash);
+        }
     }
 
     protected void checkForMissingDependency(String rootHash) {
@@ -143,18 +173,13 @@ public class LedgerValidator {
         }
     }
 
-    protected boolean isBundleValid(Transaction head) {
+    protected static class InvalidTransferException extends RuntimeException {
+        private final String headHash;
 
-        Transfer transfer = new Transfer(new Bundle(head));
-        if(!transfer.isValid()) {
-            return false;
-        }
-
-        try {
-            return isTangleValid(head.trunkHash(), head.getTrunk()) && isTangleValid(head.branchHash(), head.getBranch());
-        } catch (IncompleteTangleException incompleteTangleException) {
-            dependencyByTransfer.put(head.hash, incompleteTangleException.unavailableTransactionHash);
-            throw incompleteTangleException;
+        InvalidTransferException(String headHash) {
+            super("Invalid Transfer: '"+headHash);
+            assert headHash.length() == Transaction.Field.TRUNK_HASH.tryteLength;
+            this.headHash = headHash;
         }
     }
 
@@ -162,35 +187,9 @@ public class LedgerValidator {
         protected final String unavailableTransactionHash;
 
         IncompleteTangleException(String unavailableTransactionHash) {
-            super(unavailableTransactionHash);
+            super("Missing transaction: '"+unavailableTransactionHash+"'");
             assert unavailableTransactionHash.length() == Transaction.Field.TRUNK_HASH.tryteLength;
             this.unavailableTransactionHash = unavailableTransactionHash;
         }
-
-        @Override
-        public String toString() {
-            return "Missing transaction: '"+unavailableTransactionHash+"'";
-        }
-    }
-
-    public static BigInteger sumBalanceOfAddress(Transaction root, String address) {
-        BigInteger sum = BigInteger.ZERO;
-
-        Set<Transaction> traversed = new HashSet<>();
-        LinkedList<Transaction> toTraverse = new LinkedList<>();
-        toTraverse.add(root);
-
-        Transaction current;
-        while ((current = toTraverse.poll()) != null) {
-            if(!traversed.add(current))
-                continue;
-            toTraverse.add(current.getBranch());
-            toTraverse.add(current.getTrunk());
-
-            if(current.address().equals(address))
-                sum = sum.add(current.value);
-        }
-
-        return sum;
     }
 }

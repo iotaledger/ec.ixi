@@ -53,6 +53,34 @@ public class ECModule extends IxiModule {
         this.api = new API(this);
     }
 
+    private void test() {
+        String transfer = createTransfer();
+        String actor = createActor();
+        considerTangle(actor, transfer, transfer);
+    }
+
+    private String createActor() {
+        String actor = createNewActor(new SerializableAutoIndexableMerkleTree(random81Trytes(), 3, 2));
+        setTrust(actor, 1);
+        return actor;
+    }
+
+    private String createTransfer() {
+        BigInteger balance = BigInteger.valueOf(1000);
+        BigInteger value = BigInteger.valueOf(400);
+        int senderIndex = 0;
+
+        String seed = random81Trytes();
+        String senderAddress = ECModule.deriveAddressesFromSeed(seed, senderIndex+1).get(senderIndex);
+
+        changeInitialBalance(senderAddress, balance);
+        return sendTransfer(seed, senderIndex, random81Trytes(), random81Trytes(), value, true, new LinkedList<>());
+    }
+
+    private String random81Trytes() {
+        return Trytes.randomSequenceOfLength(81);
+    }
+
     /****** WEB GUI ******/
 
     private static void extractGUI() {
@@ -95,6 +123,7 @@ public class ECModule extends IxiModule {
         Persistence.load(this);
         logger.info("completed loading from persistence");
         ixi.addListener(confidenceEEEFunction);
+        test();
     }
 
     @Override
@@ -129,7 +158,15 @@ public class ECModule extends IxiModule {
         AutonomousEconomicActor actor = findAutonomousActor(actorAddress);
         if(actor == null)
             throw new IllegalArgumentException("None of the actors controlled by you has the address '"+actorAddress+"'");
-        actor.tick(ref1.isEmpty() || ref2.isEmpty() ? Collections.emptySet() : Collections.singleton(EconomicActor.tangleID(ref1, ref2)));
+
+        if(ref1.isEmpty() || ref2.isEmpty()) {
+            actor.tick();
+        } else {
+            String tangle = EconomicActor.tangleID(ref1, ref2);
+            if(!actor.isTangleValid(tangle))
+                throw new IllegalArgumentException("Invalid tangle defined by " + ref1 + " and " + ref2);
+            actor.tick(Collections.singleton(tangle));
+        }
     }
 
     double getConfidence(String hash) {
@@ -239,7 +276,7 @@ public class ECModule extends IxiModule {
         Set<OutputBuilder> outputs = new HashSet<>();
         outputs.add(new OutputBuilder(receiverAddress, value, "EC9RECEIVER"));
         if(!balance.equals(value))
-            outputs.add(new OutputBuilder(remainderAddress, balance.subtract(value), "EC9REMAINDER"));
+            outputs.add(new OutputBuilder(remainderAddress, value.equals(BigInteger.ZERO) ? BigInteger.ZERO : balance.subtract(value), "EC9REMAINDER"));
 
         while ((amountOfTips+1)/2 > inputs.size() * TRANSFER_SECURITY + outputs.size())
             outputs.add(new OutputBuilder(Trytes.NULL_HASH, BigInteger.ZERO, "JUST9HERE9FOR9THE9TIPS"));
