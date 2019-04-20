@@ -14,7 +14,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'com.github.iotaledger:ict:42d44f673ca80887735a4c81444b1475254f7069'
+    compileOnly 'com.github.iotaledger:ict:57a6ed564f3357dd40de8716a530779375dfb513'
     compileOnly group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.11.1'
     compileOnly group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.11.1'
     compileOnly group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.21'

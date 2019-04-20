@@ -158,7 +158,10 @@ public class LedgerValidator {
     protected void validateTransfer(Transaction head) {
         Transfer transfer = new Transfer(new Bundle(head));
         if(!transfer.isValid()) {
-            throw new InvalidTransferException(head.hash);
+            throw transfer.areSignaturesValid()
+                    ? new InvalidTransferSumException(head.hash)
+                    : new InvalidSignatureException(head.hash);
+            // TODO make Transfer.isSumZero public in Ict repo
         }
     }
 
@@ -180,6 +183,18 @@ public class LedgerValidator {
             super("Invalid Transfer: '"+headHash);
             assert headHash.length() == Transaction.Field.TRUNK_HASH.tryteLength;
             this.headHash = headHash;
+        }
+    }
+
+    protected static class InvalidSignatureException extends InvalidTransferException {
+        InvalidSignatureException(String headHash) {
+            super(headHash);
+        }
+    }
+
+    protected static class InvalidTransferSumException extends InvalidTransferException {
+        InvalidTransferSumException(String headHash) {
+            super(headHash);
         }
     }
 
